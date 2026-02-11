@@ -1,123 +1,166 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
 
--- Criar a ScreenGui principal
-local sg = Instance.new("ScreenGui")
-sg.Name = "LuizMenuGui"
-sg.Parent = game.CoreGui
-sg.ResetOnSpawn = false -- Para o menu não sumir quando morreres
+-- Criar ScreenGui
+local sg = Instance.new("ScreenGui", game.CoreGui)
+sg.Name = "LuizMenuModern"
+sg.ResetOnSpawn = false
 
--- QUADRO PRINCIPAL
+-- --- INTRO MODERNA ---
+local introText = Instance.new("TextLabel", sg)
+introText.Size = UDim2.new(0, 500, 0, 100)
+introText.Position = UDim2.new(0.5, -250, 0.5, -50)
+introText.BackgroundTransparency = 1
+introText.Text = "LUIZ MENU"
+introText.TextColor3 = Color3.fromRGB(150, 0, 255)
+introText.Font = Enum.Font.GothamBold
+introText.TextSize = 1
+introText.TextTransparency = 1
+
+-- Animação da Intro
+TweenService:Create(introText, TweenInfo.new(1, Enum.EasingStyle.Quint), {TextSize = 80, TextTransparency = 0}):Play()
+wait(1.5)
+TweenService:Create(introText, TweenInfo.new(0.8, Enum.EasingStyle.Back), {Size = UDim2.new(0,0,0,0), Position = UDim2.new(0.5, 0, 0.5, 0), TextSize = 0, TextTransparency = 1}):Play()
+wait(0.8)
+
+-- --- QUADRO PRINCIPAL ---
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 260, 0, 400)
-main.Position = UDim2.new(0.5, -130, 0.5, -200)
-main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+main.Size = UDim2.new(0, 260, 0, 420)
+main.Position = UDim2.new(0.5, -130, 0.5, -210)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 main.BorderSizePixel = 0
-main.Visible = true
 main.ClipsDescendants = true
+main.Visible = true
 
 local corner = Instance.new("UICorner", main)
-corner.CornerRadius = UDim.new(0, 12)
+corner.CornerRadius = UDim.new(0, 15)
 
--- BARRA DE TÍTULO
+-- Barra de Título
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 45)
-title.Text = "LUIZ MENU"
+title.Text = "LUIZ MENU V3"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.BackgroundColor3 = Color3.fromRGB(80, 0, 200)
+title.BackgroundColor3 = Color3.fromRGB(90, 0, 220)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
+title.TextSize = 16
+Instance.new("UICorner", title)
 
--- ÍCONE FLUTUANTE (Para abrir/fechar o menu)
+-- Botão Flutuante (L)
 local icon = Instance.new("TextButton", sg)
-icon.Size = UDim2.new(0, 50, 0, 50)
-icon.Position = UDim2.new(0, 10, 0.5, 0)
-icon.BackgroundColor3 = Color3.fromRGB(80, 0, 200)
+icon.Size = UDim2.new(0, 45, 0, 45)
+icon.Position = UDim2.new(0, 20, 0.5, 0)
+icon.BackgroundColor3 = Color3.fromRGB(90, 0, 220)
 icon.Text = "L"
 icon.TextColor3 = Color3.fromRGB(255, 255, 255)
 icon.Font = Enum.Font.GothamBold
-icon.TextSize = 25
-local iconCorner = Instance.new("UICorner", icon)
-iconCorner.CornerRadius = UDim.new(1, 0) -- Fica redondo
+icon.TextSize = 22
+Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
 
--- FUNÇÃO ABRIR/FECHAR AO CLICAR NO ÍCONE
 icon.MouseButton1Click:Connect(function()
     main.Visible = not main.Visible
-    if main.Visible then
-        main:TweenSize(UDim2.new(0, 260, 0, 400), "Out", "Back", 0.4, true)
-    end
 end)
 
--- CONTAINER DE BOTÕES
-local container = Instance.new("ScrollingFrame", main)
-container.Size = UDim2.new(1, -20, 1, -60)
-container.Position = UDim2.new(0, 10, 0, 55)
-container.BackgroundTransparency = 1
-container.CanvasSize = UDim2.new(0, 0, 1.5, 0)
-container.ScrollBarThickness = 2
+-- Scroll de Botões
+local scroll = Instance.new("ScrollingFrame", main)
+scroll.Size = UDim2.new(1, -20, 1, -60)
+scroll.Position = UDim2.new(0, 10, 0, 55)
+scroll.BackgroundTransparency = 1
+scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+scroll.ScrollBarThickness = 0
 
-local layout = Instance.new("UIListLayout", container)
-layout.Padding = UDim.new(0, 8)
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 10)
 
-local function createButton(name, callback)
-    local btn = Instance.new("TextButton", container)
-    btn.Size = UDim2.new(1, 0, 0, 35)
-    btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    btn.MouseButton1Click:Connect(callback)
+local function createButton(txt, cb)
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(1, 0, 0, 38)
+    b.Text = txt
+    b.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 13
+    Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(cb)
 end
 
 -- --- FUNÇÕES ---
-createButton("Teleportar Ilha", function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-108, 47, 18)
+
+createButton("Voo (Fly) - Q para ligar", function()
+    local flying = false
+    local speed = 50
+    local keys = {w = false, s = false, a = false, d = false}
+    
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if not gpe and input.KeyCode == Enum.KeyCode.Q then
+            flying = not flying
+            local bv = lp.Character.HumanoidRootPart:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
+            bv.Name = "FlyBV"
+            bv.MaxForce = flying and Vector3.new(math.huge, math.huge, math.huge) or Vector3.new(0,0,0)
+            while flying do
+                local dir = workspace.CurrentCamera.CFrame
+                local vel = Vector3.new(0,0,0)
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + dir.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - dir.LookVector end
+                bv.Velocity = vel * speed
+                task.wait()
+            end
+            bv:Destroy()
+        end
+    end)
+end)
+
+createButton("Teleportar: Ilha", function()
+    lp.Character.HumanoidRootPart.CFrame = CFrame.new(-108, 47, 18)
 end)
 
 createButton("Ativar ESP", function()
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer and p.Character then
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
             local h = Instance.new("Highlight", p.Character)
             h.FillColor = Color3.fromRGB(150, 0, 255)
         end
     end
 end)
 
-createButton("Mover Blocos", function()
-    local est = workspace:FindFirstChild("Structure")
-    if est then
-        for _, o in pairs(est:GetDescendants()) do
-            if o:IsA("BasePart") then o.CFrame = o.CFrame + Vector3.new(0, 60, 0) end
+createButton("Mover Blocos (Caos)", function()
+    local s = workspace:FindFirstChild("Structure")
+    if s then
+        for _, v in pairs(s:GetDescendants()) do
+            if v:IsA("BasePart") then v.CFrame = v.CFrame + Vector3.new(0, 60, 0) end
         end
     end
 end)
 
-createButton("Velocidade 100", function()
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-end)
+-- SKIN STEALER FIX
+local skinBox = Instance.new("TextBox", scroll)
+skinBox.Size = UDim2.new(1, 0, 0, 35)
+skinBox.PlaceholderText = "Nome do Player..."
+skinBox.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+skinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", skinBox)
 
--- ARRASTAR MENU
-local dragging, dragInput, dragStart, startPos
-main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = main.Position
+createButton("Copiar Skin!", function()
+    local target = Players:FindFirstChild(skinBox.Text)
+    if target and target.Character then
+        local hum = lp.Character:FindFirstChildOfClass("Humanoid")
+        local desc = Players:GetHumanoidDescriptionFromUserId(target.UserId)
+        if hum and desc then
+            hum:ApplyDescription(desc)
+        end
     end
 end)
-UserInputService.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+
+createButton("Velocidade Flash", function()
+    lp.Character.Humanoid.WalkSpeed = 100
 end)
 
--- ANIMAÇÃO INICIAL
-main.Size = UDim2.new(0, 0, 0, 0)
-main:TweenSize(UDim2.new(0, 260, 0, 400), "Out", "Back", 0.5, true)
+-- Arrastar (Draggable)
+local d, ds, sp
+main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true ds = i.Position sp = main.Position end end)
+UserInputService.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement and d then
+    local delta = i.Position - ds
+    main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
+end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
