@@ -1,155 +1,155 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
 
 -- Criar ScreenGui
-local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenuKnockoutV4"
+local sg = Instance.new("ScreenGui", CoreGui)
+sg.Name = "LuizMenuV1_Advanced"
 sg.ResetOnSpawn = false
 
--- --- INTRO LUIZ MENU ---
-local introText = Instance.new("TextLabel", sg)
-introText.Size = UDim2.new(0, 400, 0, 100)
-introText.Position = UDim2.new(0.5, -200, 0.5, -50)
+-- --- 1. INTRO LUIZ MENU V1 "3D" ---
+local introContainer = Instance.new("Frame", sg)
+introContainer.Size = UDim2.new(1, 0, 1, 0)
+introContainer.BackgroundTransparency = 1
+
+local introText = Instance.new("TextLabel", introContainer)
+introText.Size = UDim2.new(0, 500, 0, 100)
+introText.Position = UDim2.new(0.5, -250, 0.5, -50)
 introText.BackgroundTransparency = 1
-introText.Text = "LUIZ MENU: KNOCKOUT!"
-introText.TextColor3 = Color3.fromRGB(255, 0, 0)
+introText.Text = "LUIZ MENU V1"
+introText.TextColor3 = Color3.fromRGB(255, 255, 255)
 introText.Font = Enum.Font.GothamBold
 introText.TextSize = 1
 introText.TextTransparency = 1
 
-TweenService:Create(introText, TweenInfo.new(1), {TextSize = 40, TextTransparency = 0}):Play()
-task.wait(1.5)
-TweenService:Create(introText, TweenInfo.new(0.5), {TextSize = 0, TextTransparency = 1}):Play()
-task.wait(0.5)
+-- Efeito de Sombra (Para o "3D")
+local shadow = introText:Clone()
+shadow.Parent = introContainer
+shadow.TextColor3 = Color3.fromRGB(100, 0, 255)
+shadow.ZIndex = introText.ZIndex - 1
 
--- --- QUADRO PRINCIPAL ---
+-- Animação de Entrada
+task.spawn(function()
+    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    TweenService:Create(introText, info, {TextSize = 80, TextTransparency = 0}):Play()
+    TweenService:Create(shadow, info, {TextSize = 82, TextTransparency = 0.5, Position = UDim2.new(0.5, -248, 0.5, -48)}):Play()
+    wait(2)
+    TweenService:Create(introText, info, {TextTransparency = 1, TextSize = 120}):Play()
+    TweenService:Create(shadow, info, {TextTransparency = 1, TextSize = 122}):Play()
+    wait(1)
+    introContainer:Destroy()
+end)
+
+-- --- 2. INTERFACE PRINCIPAL ---
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 280, 0, 400)
-main.Position = UDim2.new(0.5, -140, 0.5, -200)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+main.Size = UDim2.new(0, 500, 0, 350)
+main.Position = UDim2.new(0.5, -250, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
 main.BorderSizePixel = 0
-main.Visible = true
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 15)
+main.Visible = false -- Fica invisível até a intro acabar
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "KNOCKOUT! HUB V4"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-Instance.new("UICorner", title)
+-- Barra Superior (Abas)
+local tabHolder = Instance.new("Frame", main)
+tabHolder.Size = UDim2.new(1, 0, 0, 45)
+tabHolder.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+tabHolder.BorderSizePixel = 0
+local tabCorner = Instance.new("UICorner", tabHolder)
 
--- BOTÃO FLUTUANTE (ABRIR/FECHAR)
-local icon = Instance.new("TextButton", sg)
-icon.Size = UDim2.new(0, 60, 0, 60)
-icon.Position = UDim2.new(0, 10, 0.2, 0)
-icon.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-icon.Text = "L"
-icon.TextColor3 = Color3.fromRGB(255, 255, 255)
-icon.Font = Enum.Font.GothamBold
-icon.TextSize = 30
-Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
-icon.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
+local tabLayout = Instance.new("UIListLayout", tabHolder)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+tabLayout.Padding = UDim.new(0, 5)
 
--- SCROLL
-local scroll = Instance.new("ScrollingFrame", main)
-scroll.Size = UDim2.new(1, -20, 1, -70)
-scroll.Position = UDim2.new(0, 10, 0, 60)
-scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 2.5, 0)
-scroll.ScrollBarThickness = 0
+-- Container de Páginas
+local pages = Instance.new("Frame", main)
+pages.Size = UDim2.new(1, -20, 1, -65)
+pages.Position = UDim2.new(0, 10, 0, 55)
+pages.BackgroundTransparency = 1
 
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 10)
+-- Botão Minimizar
+local minBtn = Instance.new("TextButton", main)
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -35, 0, 7)
+minBtn.Text = "-"
+minBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", minBtn)
 
-local function createBtn(txt, cb)
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(1, 0, 0, 45)
-    b.Text = txt
-    b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.Gotham
-    b.TextSize = 14
-    Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(cb)
+-- Ícone para Reabrir
+local openIcon = Instance.new("TextButton", sg)
+openIcon.Size = UDim2.new(0, 50, 0, 50)
+openIcon.Position = UDim2.new(0, 10, 0.5, -25)
+openIcon.Visible = false
+openIcon.Text = "L"
+openIcon.BackgroundColor3 = Color3.fromRGB(100, 0, 255)
+openIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
+
+-- Lógica de Minimizar
+minBtn.MouseButton1Click:Connect(function()
+    main.Visible = false
+    openIcon.Visible = true
+end)
+openIcon.MouseButton1Click:Connect(function()
+    main.Visible = true
+    openIcon.Visible = false
+end)
+
+-- --- 3. SISTEMA DE ABAS ---
+local function createTab(name)
+    local tabBtn = Instance.new("TextButton", tabHolder)
+    tabBtn.Size = UDim2.new(0, 90, 0, 35)
+    tabBtn.BackgroundTransparency = 1
+    tabBtn.Text = name
+    tabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    tabBtn.Font = Enum.Font.GothamBold
+    tabBtn.TextSize = 14
+    
+    local page = Instance.new("ScrollingFrame", pages)
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.Visible = false
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 0
+    page.Name = name .. "Page"
+    
+    tabBtn.MouseButton1Click:Connect(function()
+        for _, p in pairs(pages:GetChildren()) do p.Visible = false end
+        for _, t in pairs(tabHolder:GetChildren()) do 
+            if t:IsA("TextButton") then t.TextColor3 = Color3.fromRGB(150, 150, 150) end 
+        end
+        page.Visible = true
+        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+    
+    return page
 end
 
--- --- FUNÇÕES ---
+-- Criando as Abas solicitadas
+local jogoTab = createTab("Jogo")
+local playerTab = createTab("Player")
+local serverTab = createTab("Servidor")
+local farmTab = createTab("Farm")
+local trollTab = createTab("Troll")
 
-local killAura = false
-createBtn("Kill Aura (Auto-Kill)", function()
-    killAura = not killAura
-    print("Kill Aura: "..tostring(killAura))
-    task.spawn(function()
-        while killAura do
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                    if dist < 20 then
-                        local tool = lp.Character:FindFirstChildOfClass("Tool") or lp.Backpack:FindFirstChildOfClass("Tool")
-                        if tool then
-                            tool.Parent = lp.Character
-                            tool:Activate()
-                        end
-                    end
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-end)
+-- Mostrar a primeira aba por padrão
+jogoTab.Visible = true
 
-createBtn("Super Soco (Alcance)", function()
-    for _, v in pairs(lp.Character:GetChildren()) do
-        if v:IsA("BasePart") and (v.Name:find("Arm") or v.Name:find("Hand")) then
-            v.Size = Vector3.new(10, 10, 10)
-            v.Transparency = 0.8
-        end
+-- Finalizar Intro e mostrar menu
+task.delay(3.5, function() main.Visible = true end)
+
+-- Arrastar (Mobile e PC)
+local dragging, dragStart, startPos
+main.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        dragging = true dragStart = i.Position startPos = main.Position
     end
 end)
-
-createBtn("Anti-Knockback", function()
-    lp.Character.HumanoidRootPart.ChildAdded:Connect(function(c)
-        if c:IsA("BodyVelocity") or c:IsA("BodyForce") then task.wait() c:Destroy() end
-    end)
-end)
-
-local flying = false
-createBtn("Fly (Voo Mobile)", function()
-    flying = not flying
-    local hrp = lp.Character.HumanoidRootPart
-    if flying then
-        local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "FlyMobile"
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        task.spawn(function()
-            while flying do
-                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 60
-                task.wait()
-            end
-            bv:Destroy()
-        end)
+UserInputService.InputChanged:Connect(function(i)
+    if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local delta = i.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
-
-createBtn("Pulo Infinito", function()
-    UserInputService.JumpRequest:Connect(function()
-        lp.Character.Humanoid:ChangeState("Jumping")
-    end)
-end)
-
-createBtn("Velocidade Flash", function()
-    lp.Character.Humanoid.WalkSpeed = 100
-end)
-
--- ARRASTAR (DRAGGABLE)
-local d, ds, sp
-main.InputBegan:Connect(function(i) if (i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch) then d = true ds = i.Position sp = main.Position end end)
-UserInputService.InputChanged:Connect(function(i) if d and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-    local delta = i.Position - ds
-    main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
-end end)
-UserInputService.InputEnded:Connect(function() d = false end)
+UserInputService.InputEnded:Connect(function() dragging = false end)
