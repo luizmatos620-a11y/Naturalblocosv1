@@ -1,13 +1,14 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
 
 -- Criar ScreenGui
-local sg = Instance.new("ScreenGui", CoreGui)
-sg.Name = "LuizMenuV1_Advanced"
+local sg = Instance.new("ScreenGui", game.CoreGui)
+sg.Name = "LuizMenu_V1_Final"
 sg.ResetOnSpawn = false
 
--- --- 1. INTRO LUIZ MENU V1 "3D" ---
+-- --- 1. INTRO LUIZ MENU V1 (Efeito 3D) ---
 local introContainer = Instance.new("Frame", sg)
 introContainer.Size = UDim2.new(1, 0, 1, 0)
 introContainer.BackgroundTransparency = 1
@@ -22,134 +23,184 @@ introText.Font = Enum.Font.GothamBold
 introText.TextSize = 1
 introText.TextTransparency = 1
 
--- Efeito de Sombra (Para o "3D")
 local shadow = introText:Clone()
 shadow.Parent = introContainer
-shadow.TextColor3 = Color3.fromRGB(100, 0, 255)
+shadow.TextColor3 = Color3.fromRGB(80, 0, 200)
 shadow.ZIndex = introText.ZIndex - 1
 
--- Animação de Entrada
 task.spawn(function()
-    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-    TweenService:Create(introText, info, {TextSize = 80, TextTransparency = 0}):Play()
-    TweenService:Create(shadow, info, {TextSize = 82, TextTransparency = 0.5, Position = UDim2.new(0.5, -248, 0.5, -48)}):Play()
+    local info = TweenInfo.new(1, Enum.EasingStyle.Quint)
+    TweenService:Create(introText, info, {TextSize = 60, TextTransparency = 0}):Play()
+    TweenService:Create(shadow, info, {TextSize = 62, TextTransparency = 0.5, Position = UDim2.new(0.5, -248, 0.5, -48)}):Play()
     wait(2)
-    TweenService:Create(introText, info, {TextTransparency = 1, TextSize = 120}):Play()
-    TweenService:Create(shadow, info, {TextTransparency = 1, TextSize = 122}):Play()
+    TweenService:Create(introText, info, {TextTransparency = 1, TextSize = 100}):Play()
+    TweenService:Create(shadow, info, {TextTransparency = 1, TextSize = 102}):Play()
     wait(1)
     introContainer:Destroy()
 end)
 
--- --- 2. INTERFACE PRINCIPAL ---
+-- --- 2. INTERFACE ESTILO SIDEBAR ---
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 500, 0, 350)
-main.Position = UDim2.new(0.5, -250, 0.5, -175)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+main.Size = UDim2.new(0, 550, 0, 320)
+main.Position = UDim2.new(0.5, -275, 0.5, -160)
+main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 main.BorderSizePixel = 0
-main.Visible = false -- Fica invisível até a intro acabar
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+main.Visible = false
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 8)
 
--- Barra Superior (Abas)
-local tabHolder = Instance.new("Frame", main)
-tabHolder.Size = UDim2.new(1, 0, 0, 45)
-tabHolder.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-tabHolder.BorderSizePixel = 0
-local tabCorner = Instance.new("UICorner", tabHolder)
+local sidebar = Instance.new("Frame", main)
+sidebar.Size = UDim2.new(0, 150, 1, 0)
+sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+sidebar.BorderSizePixel = 0
+Instance.new("UICorner", sidebar)
 
-local tabLayout = Instance.new("UIListLayout", tabHolder)
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-tabLayout.Padding = UDim.new(0, 5)
+local tabButtons = Instance.new("Frame", sidebar)
+tabButtons.Size = UDim2.new(1, -20, 1, -50)
+tabButtons.Position = UDim2.new(0, 10, 0, 45)
+tabButtons.BackgroundTransparency = 1
+local layout = Instance.new("UIListLayout", tabButtons)
+layout.Padding = UDim.new(0, 5)
 
--- Container de Páginas
-local pages = Instance.new("Frame", main)
-pages.Size = UDim2.new(1, -20, 1, -65)
-pages.Position = UDim2.new(0, 10, 0, 55)
-pages.BackgroundTransparency = 1
+local content = Instance.new("Frame", main)
+content.Size = UDim2.new(1, -170, 1, -20)
+content.Position = UDim2.new(0, 160, 0, 10)
+content.BackgroundTransparency = 1
 
--- Botão Minimizar
-local minBtn = Instance.new("TextButton", main)
-minBtn.Size = UDim2.new(0, 30, 0, 30)
-minBtn.Position = UDim2.new(1, -35, 0, 7)
-minBtn.Text = "-"
-minBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", minBtn)
+-- Botões de fechar e abrir
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -30, 0, 5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+closeBtn.BackgroundTransparency = 1
 
--- Ícone para Reabrir
-local openIcon = Instance.new("TextButton", sg)
+local openIcon = Instance.new("ImageButton", sg)
 openIcon.Size = UDim2.new(0, 50, 0, 50)
-openIcon.Position = UDim2.new(0, 10, 0.5, -25)
+openIcon.Position = UDim2.new(0.5, -25, 0, 15)
 openIcon.Visible = false
-openIcon.Text = "L"
-openIcon.BackgroundColor3 = Color3.fromRGB(100, 0, 255)
-openIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+openIcon.Image = "rbxassetid://11293318182" -- ID Caveira
+openIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
 
--- Lógica de Minimizar
-minBtn.MouseButton1Click:Connect(function()
-    main.Visible = false
-    openIcon.Visible = true
-end)
-openIcon.MouseButton1Click:Connect(function()
-    main.Visible = true
-    openIcon.Visible = false
-end)
+closeBtn.MouseButton1Click:Connect(function() main.Visible = false openIcon.Visible = true end)
+openIcon.MouseButton1Click:Connect(function() main.Visible = true openIcon.Visible = false end)
 
 -- --- 3. SISTEMA DE ABAS ---
 local function createTab(name)
-    local tabBtn = Instance.new("TextButton", tabHolder)
-    tabBtn.Size = UDim2.new(0, 90, 0, 35)
-    tabBtn.BackgroundTransparency = 1
-    tabBtn.Text = name
-    tabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    tabBtn.Font = Enum.Font.GothamBold
-    tabBtn.TextSize = 14
-    
-    local page = Instance.new("ScrollingFrame", pages)
+    local btn = Instance.new("TextButton", tabButtons)
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    btn.Font = Enum.Font.Gotham
+    Instance.new("UICorner", btn)
+
+    local page = Instance.new("ScrollingFrame", content)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.Visible = false
     page.BackgroundTransparency = 1
     page.ScrollBarThickness = 0
-    page.Name = name .. "Page"
-    
-    tabBtn.MouseButton1Click:Connect(function()
-        for _, p in pairs(pages:GetChildren()) do p.Visible = false end
-        for _, t in pairs(tabHolder:GetChildren()) do 
-            if t:IsA("TextButton") then t.TextColor3 = Color3.fromRGB(150, 150, 150) end 
-        end
+    Instance.new("UIListLayout", page).Padding = UDim.new(0, 8)
+
+    btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(content:GetChildren()) do p.Visible = false end
         page.Visible = true
-        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
-    
     return page
 end
 
--- Criando as Abas solicitadas
-local jogoTab = createTab("Jogo")
-local playerTab = createTab("Player")
-local serverTab = createTab("Servidor")
-local farmTab = createTab("Farm")
-local trollTab = createTab("Troll")
+local function addOption(parent, txt, cb)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, -10, 0, 40)
+    b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    b.Text = txt
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(cb)
+end
 
--- Mostrar a primeira aba por padrão
-jogoTab.Visible = true
+-- Criando as Abas
+local jogoPage = createTab("Jogo")
+local playerPage = createTab("Player")
+local serverPage = createTab("Servidor")
+local farmPage = createTab("Farm")
+local trollPage = createTab("Troll")
 
--- Finalizar Intro e mostrar menu
-task.delay(3.5, function() main.Visible = true end)
+-- --- ABA PLAYER ---
+addOption(playerPage, "Velocidade (100)", function() lp.Character.Humanoid.WalkSpeed = 100 end)
+addOption(playerPage, "Pulo Alto (120)", function() lp.Character.Humanoid.JumpPower = 120 end)
+addOption(playerPage, "Pulo Infinito", function()
+    UserInputService.JumpRequest:Connect(function() lp.Character.Humanoid:ChangeState("Jumping") end)
+end)
 
--- Arrastar (Mobile e PC)
-local dragging, dragStart, startPos
-main.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dragging = true dragStart = i.Position startPos = main.Position
+-- --- ABA JOGO ---
+addOption(jogoPage, "Remover Texturas (No Lag)", function()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
     end
 end)
-UserInputService.InputChanged:Connect(function(i)
-    if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-        local delta = i.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+addOption(jogoPage, "Full Bright (Claridade)", function()
+    game.Lighting.Brightness = 2
+    game.Lighting.ClockTime = 14
+    game.Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+end)
+
+-- --- ABA SERVIDOR ---
+addOption(serverPage, "ESP Jogadores", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
+            local h = Instance.new("Highlight", p.Character)
+            h.FillColor = Color3.fromRGB(255, 0, 0)
+        end
     end
 end)
-UserInputService.InputEnded:Connect(function() dragging = false end)
+addOption(serverPage, "Reentrar no Servidor", function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, lp)
+end)
+
+-- --- ABA FARM ---
+addOption(farmPage, "Auto-Clicker (E)", function()
+    _G.Click = not _G.Click
+    while _G.Click do
+        local tool = lp.Character:FindFirstChildOfClass("Tool")
+        if tool then tool:Activate() end
+        task.wait(0.1)
+    end
+end)
+addOption(farmPage, "Anti-AFK", function()
+    lp.Idled:Connect(function()
+        game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+    end)
+end)
+
+-- --- ABA TROLL ---
+local audioBox = Instance.new("TextBox", trollPage)
+audioBox.Size = UDim2.new(1, -10, 0, 35)
+audioBox.PlaceholderText = "ID do Áudio..."
+audioBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+audioBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", audioBox)
+
+addOption(trollPage, "Tocar Som", function()
+    local s = Instance.new("Sound", game:GetService("SoundService"))
+    s.SoundId = "rbxassetid://"..audioBox.Text
+    s.Volume = 10
+    s:Play()
+end)
+addOption(trollPage, "Ficar Invisível", function()
+    for _, v in pairs(lp.Character:GetDescendants()) do
+        if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end
+    end
+end)
+
+-- Finalização
+task.delay(3.5, function() main.Visible = true jogoPage.Visible = true end)
+
+-- Arrastar Menu
+local d, ds, sp
+main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true ds = i.Position sp = main.Position end end)
+UserInputService.InputChanged:Connect(function(i) if d then
+    local delta = i.Position - ds
+    main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
+end end)
+UserInputService.InputEnded:Connect(function() d = false end)
