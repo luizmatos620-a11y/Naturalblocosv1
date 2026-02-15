@@ -1,14 +1,15 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
 -- Criar ScreenGui
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_Brookhaven_Edition"
+sg.Name = "LuizMenu_V1_Pro_Edition"
 sg.ResetOnSpawn = false
 
--- --- 1. INTRO LUIZ MENU V1 (Efeito 3D Moderno) ---
+-- --- 1. INTRO LUIZ MENU V1 (Efeito 3D) ---
 local introContainer = Instance.new("Frame", sg)
 introContainer.Size = UDim2.new(1, 0, 1, 0)
 introContainer.BackgroundTransparency = 1
@@ -39,21 +40,18 @@ task.spawn(function()
     introContainer:Destroy()
 end)
 
--- --- 2. INTERFACE GRANDE (ESTILO SIDEBAR PROFISSIONAL) ---
+-- --- 2. INTERFACE PRINCIPAL ---
 local main = Instance.new("Frame", sg)
 main.Size = UDim2.new(0, 650, 0, 420) 
 main.Position = UDim2.new(0.5, -325, 0.5, -210)
 main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-main.BackgroundTransparency = 0.05
 main.BorderSizePixel = 0
 main.Visible = false
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
--- Barra Lateral
 local sidebar = Instance.new("Frame", main)
 sidebar.Size = UDim2.new(0, 180, 1, 0)
 sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-sidebar.BorderSizePixel = 0
 Instance.new("UICorner", sidebar)
 
 local tabButtons = Instance.new("Frame", sidebar)
@@ -62,51 +60,40 @@ tabButtons.Position = UDim2.new(0, 10, 0, 50)
 tabButtons.BackgroundTransparency = 1
 Instance.new("UIListLayout", tabButtons).Padding = UDim.new(0, 8)
 
--- Conteúdo Central
 local content = Instance.new("Frame", main)
 content.Size = UDim2.new(1, -200, 1, -30)
 content.Position = UDim2.new(0, 190, 0, 15)
 content.BackgroundTransparency = 1
 
--- Botão Fechar
 local closeBtn = Instance.new("TextButton", main)
 closeBtn.Size = UDim2.new(0, 35, 0, 35)
 closeBtn.Position = UDim2.new(1, -40, 0, 5)
 closeBtn.Text = "X"
-closeBtn.TextSize = 22
 closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
 closeBtn.BackgroundTransparency = 1
 closeBtn.Font = Enum.Font.GothamBold
 
--- --- 3. ÍCONE DE ABRIR ARRASTÁVEL (CAVEIRA) ---
 local openIcon = Instance.new("ImageButton", sg)
 openIcon.Size = UDim2.new(0, 65, 0, 65)
 openIcon.Position = UDim2.new(0.5, -32, 0, 20)
 openIcon.Visible = false
 openIcon.Image = "rbxassetid://11293318182" 
 openIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-openIcon.ZIndex = 10
 Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
 
--- Função Arrastar Ícone
+-- Arrastar Ícone
 local draggingIcon, iconStart, iconPos
-openIcon.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        draggingIcon = true iconStart = i.Position iconPos = openIcon.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(i)
-    if draggingIcon and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-        local delta = i.Position - iconStart
-        openIcon.Position = UDim2.new(iconPos.X.Scale, iconPos.X.Offset + delta.X, iconPos.Y.Scale, iconPos.Y.Offset + delta.Y)
-    end
-end)
+openIcon.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then draggingIcon = true iconStart = i.Position iconPos = openIcon.Position end end)
+UserInputService.InputChanged:Connect(function(i) if draggingIcon then
+    local delta = i.Position - iconStart
+    openIcon.Position = UDim2.new(iconPos.X.Scale, iconPos.X.Offset + delta.X, iconPos.Y.Scale, iconPos.Y.Offset + delta.Y)
+end end)
 UserInputService.InputEnded:Connect(function() draggingIcon = false end)
 
 closeBtn.MouseButton1Click:Connect(function() main.Visible = false openIcon.Visible = true end)
 openIcon.MouseButton1Click:Connect(function() main.Visible = true openIcon.Visible = false end)
 
--- --- 4. SISTEMA DE CRIAÇÃO DE OPÇÕES ---
+-- --- 3. SISTEMA DE ABAS ---
 local function createTab(name)
     local btn = Instance.new("TextButton", tabButtons)
     btn.Size = UDim2.new(1, 0, 0, 45)
@@ -114,14 +101,14 @@ local function createTab(name)
     btn.Text = name
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 16
+    btn.TextSize = 14
     Instance.new("UICorner", btn)
 
     local page = Instance.new("ScrollingFrame", content)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.Visible = false
     page.BackgroundTransparency = 1
-    page.ScrollBarThickness = 2
+    page.ScrollBarThickness = 0
     Instance.new("UIListLayout", page).Padding = UDim.new(0, 12)
 
     btn.MouseButton1Click:Connect(function()
@@ -138,67 +125,92 @@ local function addOption(parent, txt, cb)
     b.Text = txt
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.GothamBold
-    b.TextSize = 15
     Instance.new("UICorner", b)
     b.MouseButton1Click:Connect(cb)
 end
 
--- --- 5. DEFINIÇÃO DAS ABAS ---
-local jogoPage = createTab("Jogo")
+-- --- 4. CONFIGURAÇÃO DAS ABAS ---
+local desastrePage = createTab("Desastres")
 local playerPage = createTab("Player")
 local serverPage = createTab("Servidor")
-local farmPage = createTab("Farm")
 local trollPage = createTab("Troll")
 
--- OPÇÕES ABA PLAYER
-addOption(playerPage, "Velocidade Flash (100)", function() lp.Character.Humanoid.WalkSpeed = 100 end)
-addOption(playerPage, "Super Pulo (150)", function() lp.Character.Humanoid.JumpPower = 150 end)
-addOption(playerPage, "Pulo Infinito", function()
-    UserInputService.JumpRequest:Connect(function() lp.Character.Humanoid:ChangeState("Jumping") end)
+-- ABA DESASTRES
+addOption(desastrePage, "Ilha Segura (Teleport)", function()
+    lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 175, 375)
+end)
+addOption(desastrePage, "Remover Dano de Queda", function()
+    lp.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
 end)
 
--- OPÇÕES ABA TROLL (ESPECIAL BROOKHAVEN)
-local audioBox = Instance.new("TextBox", trollPage)
-audioBox.Size = UDim2.new(1, -10, 0, 40)
-audioBox.PlaceholderText = "Cole o ID do Áudio aqui..."
-audioBox.Text = ""
-audioBox.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-audioBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", audioBox)
+-- ABA PLAYER (FLY, NOCLIP, TELEPORT)
+local targetBox = Instance.new("TextBox", playerPage)
+targetBox.Size = UDim2.new(1, -10, 0, 40)
+targetBox.PlaceholderText = "Nome do Jogador..."
+targetBox.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+targetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", targetBox)
 
-addOption(trollPage, "Tocar Som (Local/SoundService)", function()
-    local s = Instance.new("Sound", game:GetService("SoundService"))
-    s.SoundId = "rbxassetid://"..audioBox.Text
-    s.Volume = 10
-    s:Play()
-end)
-
-addOption(trollPage, "Ficar Invisível (Todos Jogos)", function()
-    local char = lp.Character
-    for _, v in pairs(char:GetDescendants()) do
-        if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end
+addOption(playerPage, "Teleportar ao Player", function()
+    local target = targetBox.Text
+    for _, v in pairs(Players:GetPlayers()) do
+        if v.Name:lower():sub(1, #target) == target:lower() then
+            lp.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
+        end
     end
-    if char:FindFirstChild("Head") and char.Head:FindFirstChild("face") then char.Head.face:Destroy() end
 end)
 
-addOption(trollPage, "Animação Zumbi (FE)", function()
-    local anim = Instance.new("Animation")
-    anim.AnimationId = "rbxassetid://616159544"
-    local load = lp.Character.Humanoid:LoadAnimation(anim)
-    load:Play()
+local noclip = false
+addOption(playerPage, "Noclip (Ativar/Desativar)", function()
+    noclip = not noclip
+    RunService.Stepped:Connect(function()
+        if noclip then
+            for _, v in pairs(lp.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
 end)
 
-addOption(trollPage, "Virar uma Caixa", function()
-    local box = Instance.new("Part", lp.Character)
-    box.Size = Vector3.new(5,5,5)
-    box.BrickColor = BrickColor.new("Slime green")
-    box.CanCollide = false
-    local weld = Instance.new("Weld", box)
-    weld.Part0 = box
-    weld.Part1 = lp.Character.HumanoidRootPart
+local flying = false
+addOption(playerPage, "Fly Estático (Céu)", function()
+    flying = not flying
+    local hrp = lp.Character.HumanoidRootPart
+    if flying then
+        local bg = Instance.new("BodyGyro", hrp)
+        bg.P = 9e4
+        bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.CFrame = hrp.CFrame
+        local bv = Instance.new("BodyVelocity", hrp)
+        bv.velocity = Vector3.new(0, 0.1, 0)
+        bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        hrp.CFrame = hrp.CFrame * CFrame.new(0, 50, 0) -- Sobe para o céu
+    else
+        for _, v in pairs(hrp:GetChildren()) do
+            if v:IsA("BodyGyro") or v:IsA("BodyVelocity") then v:Destroy() end
+        end
+    end
 end)
 
--- ARRASTAR MENU PRINCIPAL
+-- ABA SERVIDOR
+addOption(serverPage, "Contar Jogadores", function()
+    local count = #Players:GetPlayers()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Servidor",
+        Text = "Existem " .. count .. " jogadores online.",
+        Duration = 5
+    })
+end)
+
+-- ABA TROLL
+addOption(trollPage, "Fling (Matar no Toque)", function()
+    local bV = Instance.new("BodyAngularVelocity", lp.Character.HumanoidRootPart)
+    bV.AngularVelocity = Vector3.new(0, 99999, 0)
+    bV.MaxTorque = Vector3.new(0, math.huge, 0)
+    bV.P = math.huge
+end)
+
+-- Arrastar Menu
 local d, ds, sp
 main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true ds = i.Position sp = main.Position end end)
 UserInputService.InputChanged:Connect(function(i) if d then
@@ -207,4 +219,4 @@ UserInputService.InputChanged:Connect(function(i) if d then
 end end)
 UserInputService.InputEnded:Connect(function() d = false end)
 
-task.delay(3.5, function() main.Visible = true jogoPage.Visible = true end)
+task.delay(3.5, function() main.Visible = true desastrePage.Visible = true end)
