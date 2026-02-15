@@ -160,28 +160,43 @@ addOption(playerPage, "Fly Estático (Céu)", function()
     end
 end)
 
--- ABA TROLL
-addOption(trollPage, "Fling (Matar no Encosto)", function()
-    local bV = Instance.new("BodyAngularVelocity", lp.Character.HumanoidRootPart)
-    bV.AngularVelocity = Vector3.new(0, 999999, 0)
-    bV.MaxTorque = Vector3.new(0, math.huge, 0)
-    bV.P = math.huge
-end)
-
-addOption(trollPage, "Kill Aura (Auto-Attack)", function()
-    _G.Aura = not _G.Aura
-    while _G.Aura do
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                if (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude < 25 then
-                    local tool = lp.Character:FindFirstChildOfClass("Tool")
-                    if tool then tool:Activate() end
+-- ABA TROLL (FLING ATUALIZADO)
+local flinging = false
+addOption(trollPage, "Fling (SÓ ELES VOAM)", function()
+    flinging = not flinging
+    
+    local hrp = lp.Character:FindFirstChild("HumanoidRootPart")
+    local char = lp.Character
+    
+    if flinging then
+        -- Ativa o giro maluco
+        local bV = Instance.new("BodyAngularVelocity", hrp)
+        bV.Name = "LuizFlingV2"
+        bV.AngularVelocity = Vector3.new(0, 999999, 0)
+        bV.MaxTorque = Vector3.new(0, math.huge, 0)
+        bV.P = math.huge
+        
+        -- Ativa o Noclip para VOCÊ não bater no mapa e voar
+        task.spawn(function()
+            while flinging do
+                for _, v in pairs(char:GetChildren()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
                 end
+                RunService.Stepped:Wait()
             end
+        end)
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Luiz Menu V1", Text = "Fling Seguro Ativado!"})
+    else
+        -- Desativa tudo
+        if hrp:FindFirstChild("LuizFlingV2") then hrp.LuizFlingV2:Destroy() end
+        flinging = false
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then v.CanCollide = true end
         end
-        task.wait(0.1)
     end
 end)
+
 
 -- ABA BRING
 local bringInput = Instance.new("TextBox", bringPage)
