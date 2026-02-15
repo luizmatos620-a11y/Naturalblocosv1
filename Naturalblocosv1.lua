@@ -4,149 +4,118 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 
--- Criar ScreenGui
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_GOD_MODE"
+sg.Name = "LuizMenu_V1_Final"
 sg.ResetOnSpawn = false
 
--- --- 1. INTRO ---
-local introContainer = Instance.new("Frame", sg)
-introContainer.Size = UDim2.new(1, 0, 1, 0)
-introContainer.BackgroundTransparency = 1
-
-local introText = Instance.new("TextLabel", introContainer)
-introText.Size = UDim2.new(0, 600, 0, 120)
-introText.Position = UDim2.new(0.5, -300, 0.5, -60)
-introText.BackgroundTransparency = 1
-introText.Text = "LUIZ MENU V1"
-introText.TextColor3 = Color3.fromRGB(255, 255, 255)
-introText.Font = Enum.Font.GothamBold
-introText.TextSize = 1
-introText.TextTransparency = 1
-
-task.spawn(function()
-    local info = TweenInfo.new(1.2, Enum.EasingStyle.Quint)
-    TweenService:Create(introText, info, {TextSize = 70, TextTransparency = 0}):Play()
-    wait(2)
-    TweenService:Create(introText, info, {TextTransparency = 1, TextSize = 110}):Play()
-    wait(1)
-    introContainer:Destroy()
-end)
-
--- --- 2. INTERFACE ---
+-- --- 1. INTERFACE ---
 local main = Instance.new("Frame", sg)
 main.Size = UDim2.new(0, 650, 0, 420) 
 main.Position = UDim2.new(0.5, -325, 0.5, -210)
-main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 main.Visible = false
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 15)
 
-local sidebar = Instance.new("Frame", main)
-sidebar.Size = UDim2.new(0, 170, 1, 0)
-sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-Instance.new("UICorner", sidebar)
+-- Botão de Minimizar (X)
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0, 40, 0, 40)
+closeBtn.Position = UDim2.new(1, -45, 0, 5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.TextSize = 25
+closeBtn.BackgroundTransparency = 1
+closeBtn.Font = Enum.Font.GothamBold
 
-local tabButtons = Instance.new("Frame", sidebar)
-tabButtons.Size = UDim2.new(1, -20, 1, -60)
-tabButtons.Position = UDim2.new(0, 10, 0, 50)
-tabButtons.BackgroundTransparency = 1
-Instance.new("UIListLayout", tabButtons).Padding = UDim.new(0, 8)
-
-local content = Instance.new("Frame", main)
-content.Size = UDim2.new(1, -190, 1, -20)
-content.Position = UDim2.new(0, 180, 0, 10)
-content.BackgroundTransparency = 1
-
+-- Ícone de Abrir (Caveira Arrastável)
 local openIcon = Instance.new("ImageButton", sg)
 openIcon.Size = UDim2.new(0, 65, 0, 65)
-openIcon.Position = UDim2.new(0.5, -32, 0, 15)
+openIcon.Position = UDim2.new(0, 20, 0.5, -32)
 openIcon.Image = "rbxassetid://11293318182"
 openIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-openIcon.Visible = false
+openIcon.Visible = true
 Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
 
--- --- 3. SISTEMA DE ABAS ---
-local function createTab(name)
-    local btn = Instance.new("TextButton", tabButtons)
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    btn.Font = Enum.Font.GothamBold
-    Instance.new("UICorner", btn)
+closeBtn.MouseButton1Click:Connect(function() main.Visible = false openIcon.Visible = true end)
+openIcon.MouseButton1Click:Connect(function() main.Visible = true openIcon.Visible = false end)
 
-    local page = Instance.new("ScrollingFrame", content)
-    page.Size = UDim2.new(1, 0, 1, 0)
-    page.Visible = false
-    page.BackgroundTransparency = 1
-    page.ScrollBarThickness = 0
-    Instance.new("UIListLayout", page).Padding = UDim.new(0, 10)
+-- --- SISTEMA DE ABAS (Simplificado para o código não ficar gigante) ---
+local sidebar = Instance.new("Frame", main)
+sidebar.Size = UDim2.new(0, 170, 1, 0)
+sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", sidebar)
 
-    btn.MouseButton1Click:Connect(function()
-        for _, p in pairs(content:GetChildren()) do p.Visible = false end
-        page.Visible = true
-    end)
-    return page
-end
+local container = Instance.new("Frame", main)
+container.Size = UDim2.new(1, -190, 1, -20)
+container.Position = UDim2.new(0, 180, 0, 10)
+container.BackgroundTransparency = 1
 
-local function addOption(parent, txt, cb)
-    local b = Instance.new("TextButton", parent)
+local function addOption(name, cb)
+    local b = Instance.new("TextButton", container)
     b.Size = UDim2.new(1, -10, 0, 45)
-    b.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    b.Text = txt
+    b.Text = name
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.GothamBold
     Instance.new("UICorner", b)
     b.MouseButton1Click:Connect(cb)
+    Instance.new("UIListLayout", container).Padding = UDim.new(0, 10)
 end
 
--- --- 4. CONFIGURAÇÃO DAS ABAS ---
-local desastrePage = createTab("Desastres")
-local playerPage = createTab("Player")
-local bringPage = createTab("Bring")
-local trollPage = createTab("Troll")
-local serverPage = createTab("Servidor")
+-- --- FUNÇÕES PODEROSAS E OTIMIZADAS ---
 
--- ABA DESASTRES (FUNÇÃO PEDIDA)
+-- 1. OBJECT KILL (SEM LAG)
 _G.PartKill = false
-addOption(desastrePage, "Chuva de Objetos (KILL ALL)", function()
+addOption("Chuva de Objetos (ANTI-LAG)", function()
     _G.PartKill = not _G.PartKill
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LUIZ MENU V1", Text = "Part Kill: " .. tostring(_G.PartKill)})
-    
-    while _G.PartKill do
-        for _, p in pairs(workspace:GetDescendants()) do
-            if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
-                for _, player in pairs(Players:GetPlayers()) do
-                    if player ~= lp and player.Character and player.Character:FindFirstChild("Head") then
-                        p.CFrame = player.Character.Head.CFrame
-                        p.Velocity = Vector3.new(0, 100, 0) -- Força o impacto
+    if _G.PartKill then
+        task.spawn(function()
+            while _G.PartKill do
+                local parts = 0
+                for _, p in pairs(workspace:GetDescendants()) do
+                    if parts > 20 then break end -- Limite de 20 peças por vez para não travar o celular
+                    if p:IsA("BasePart") and not p.Anchored and p:IsA("Part") then
+                        for _, pl in pairs(Players:GetPlayers()) do
+                            if pl ~= lp and pl.Character and pl.Character:FindFirstChild("Head") then
+                                p.CFrame = pl.Character.Head.CFrame
+                                p.Velocity = Vector3.new(0, 300, 0)
+                                parts = parts + 1
+                            end
+                        end
                     end
                 end
+                task.wait(0.2) -- Delay maior para o processador do celular respirar
             end
-        end
-        task.wait(0.1)
+        end)
     end
 end)
 
-addOption(desastrePage, "Ilha Segura (Teleport)", function()
-    lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 175, 375)
-end)
-
--- ABA PLAYER
-local noclip = false
-addOption(playerPage, "Noclip (Atravessar)", function()
-    noclip = not noclip
-    RunService.Stepped:Connect(function()
-        if noclip and lp.Character then
-            for _, v in pairs(lp.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = false end
+-- 2. FLING (SEGURO - SÓ ELES VOAM)
+local flinging = false
+addOption("Fling (Matar no Toque)", function()
+    flinging = not flinging
+    local hrp = lp.Character.HumanoidRootPart
+    if flinging then
+        local bV = Instance.new("BodyAngularVelocity", hrp)
+        bV.Name = "LuizFling"
+        bV.AngularVelocity = Vector3.new(0, 999999, 0)
+        bV.MaxTorque = Vector3.new(0, math.huge, 0)
+        
+        task.spawn(function()
+            while flinging do
+                for _, v in pairs(lp.Character:GetChildren()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+                task.wait()
             end
-        end
-    end)
+        end)
+    else
+        if hrp:FindFirstChild("LuizFling") then hrp.LuizFling:Destroy() end
+    end
 end)
 
+-- 3. FLY ESTÁTICO (FUGIR DOS DESASTRES)
 local flying = false
-addOption(playerPage, "Fly Estático (Céu)", function()
+addOption("Fly Estático (Céu)", function()
     flying = not flying
     local hrp = lp.Character.HumanoidRootPart
     if flying then
@@ -154,84 +123,24 @@ addOption(playerPage, "Fly Estático (Céu)", function()
         bv.Name = "LuizFly"
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        hrp.CFrame = hrp.CFrame * CFrame.new(0, 60, 0)
+        hrp.CFrame = hrp.CFrame * CFrame.new(0, 70, 0) -- Sobe direto pro céu
     else
         if hrp:FindFirstChild("LuizFly") then hrp.LuizFly:Destroy() end
     end
 end)
 
--- ABA TROLL (FLING ATUALIZADO)
-local flinging = false
-addOption(trollPage, "Fling (SÓ ELES VOAM)", function()
-    flinging = not flinging
-    
-    local hrp = lp.Character:FindFirstChild("HumanoidRootPart")
-    local char = lp.Character
-    
-    if flinging then
-        -- Ativa o giro maluco
-        local bV = Instance.new("BodyAngularVelocity", hrp)
-        bV.Name = "LuizFlingV2"
-        bV.AngularVelocity = Vector3.new(0, 999999, 0)
-        bV.MaxTorque = Vector3.new(0, math.huge, 0)
-        bV.P = math.huge
-        
-        -- Ativa o Noclip para VOCÊ não bater no mapa e voar
-        task.spawn(function()
-            while flinging do
-                for _, v in pairs(char:GetChildren()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
-                RunService.Stepped:Wait()
-            end
-        end)
-        
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Luiz Menu V1", Text = "Fling Seguro Ativado!"})
-    else
-        -- Desativa tudo
-        if hrp:FindFirstChild("LuizFlingV2") then hrp.LuizFlingV2:Destroy() end
-        flinging = false
-        for _, v in pairs(char:GetChildren()) do
-            if v:IsA("BasePart") then v.CanCollide = true end
-        end
-    end
-end)
+-- --- SISTEMA DE ARRASTAR ---
+local function drag(frame)
+    local d, ds, sp
+    frame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true ds = i.Position sp = frame.Position end end)
+    UserInputService.InputChanged:Connect(function(i) if d then
+        local delta = i.Position - ds
+        frame.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
+    end end)
+    UserInputService.InputEnded:Connect(function() d = false end)
+end
+drag(main)
+drag(openIcon)
 
-
--- ABA BRING
-local bringInput = Instance.new("TextBox", bringPage)
-bringInput.Size = UDim2.new(1, -10, 0, 40)
-bringInput.PlaceholderText = "Nome do Player..."
-bringInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bringInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", bringInput)
-
-addOption(bringPage, "Puxar Player (Bring)", function()
-    local target = bringInput.Text:lower()
-    for _, v in pairs(Players:GetPlayers()) do
-        if v.Name:lower():sub(1, #target) == target then
-            v.Character.HumanoidRootPart.CFrame = lp.Character.HumanoidRootPart.CFrame
-        end
-    end
-end)
-
--- ABA SERVIDOR
-addOption(serverPage, "Contar Jogadores", function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Servidor", Text = "Jogadores: " .. #Players:GetPlayers()})
-end)
-
--- --- SISTEMA DE ARRASTAR E ABRIR ---
-local dragging, dragStart, startPos
-main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = main.Position end end)
-UserInputService.InputChanged:Connect(function(i) if dragging then
-    local delta = i.Position - dragStart
-    main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end end)
-UserInputService.InputEnded:Connect(function() dragging = false end)
-
-openIcon.MouseButton1Click:Connect(function() main.Visible = true openIcon.Visible = false end)
-Instance.new("TextButton", main).MouseButton1Click:Connect(function() main.Visible = false openIcon.Visible = true end) -- Botão fechar improvisado
-
-task.wait(3.5)
 main.Visible = true
-desastrePage.Visible = true
+openIcon.Visible = false
