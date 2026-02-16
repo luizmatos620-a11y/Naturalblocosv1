@@ -1,15 +1,11 @@
--- LUIZ MENU V1 - EDIÇÃO OMNI (FLING FIXADO)
+-- LUIZ MENU V1 - EDIÇÃO OMNI (FLING ESTÁTICO)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "LUIZ MENU V1 👑",
-   LoadingTitle = "Injetando Protocolos de Elite...",
+   LoadingTitle = "Estabilizando Físicas...",
    LoadingSubtitle = "por Luiz",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "LuizMenu", 
-      FileName = "Luiz_Config"
-   },
+   ConfigurationSaving = { Enabled = false },
    KeySystem = false
 })
 
@@ -24,7 +20,6 @@ TabSobrevivencia:CreateButton({
    Callback = function()
       if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
          lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 180, 380)
-         Rayfield:Notify({Title = "SUCESSO", Content = "Você foi para a zona de segurança!", Duration = 3})
       end
    end,
 })
@@ -32,7 +27,6 @@ TabSobrevivencia:CreateButton({
 TabSobrevivencia:CreateToggle({
    Name = "Anular Dano de Queda 🦴",
    CurrentValue = false,
-   Flag = "NoFall",
    Callback = function(Value)
       _G.NoFall = Value
       task.spawn(function()
@@ -46,75 +40,65 @@ TabSobrevivencia:CreateToggle({
    end,
 })
 
-TabSobrevivencia:CreateButton({
-   Name = "Ativar Balão Mágico 🎈",
-   Callback = function()
-      local bodyFloat = Instance.new("BodyForce")
-      bodyFloat.Parent = lp.Character.HumanoidRootPart
-      bodyFloat.Force = Vector3.new(0, game.Workspace.Gravity * lp.Character.HumanoidRootPart:GetMass() * 0.9, 0)
-      Rayfield:Notify({Title = "BALÃO ATIVO", Content = "Física de flutuação aplicada!", Duration = 3})
-   end,
-})
-
--- --- ABA AURA (FLING ARRUMADO COM NOCLIP) ---
+-- --- ABA AURA (FLING ESTÁTICO CORRIGIDO) ---
 local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
 
 TabAura:CreateToggle({
-   Name = "Aura de Expulsão (Fling) 🌀",
+   Name = "Aura de Expulsão (Fling Fixo) 🌀",
    CurrentValue = false,
    Flag = "FlingAura",
    Callback = function(Value)
       _G.FlingAura = Value
       
-      -- Loop do Noclip e Estabilidade (Para você não voar junto)
-      task.spawn(function()
-         while _G.FlingAura do
-            if lp.Character then
-               for _, part in pairs(lp.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then
-                     part.CanCollide = false -- Noclip ativo
+      if Value then
+         local hrp = lp.Character.HumanoidRootPart
+         local posInicial = hrp.Position -- Salva onde você está
+
+         -- Criar trava de posição para não flutuar
+         local trava = Instance.new("BodyPosition")
+         trava.Name = "TravaFling"
+         trava.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+         trava.Position = posInicial
+         trava.Parent = hrp
+
+         task.spawn(function()
+            while _G.FlingAura do
+               -- Noclip para não bugar no chão
+               if lp.Character then
+                  for _, part in pairs(lp.Character:GetDescendants()) do
+                     if part:IsA("BasePart") then part.CanCollide = false end
                   end
                end
+               
+               -- Rotação extrema apenas no eixo Y (sem flutuar)
+               hrp.RotVelocity = Vector3.new(0, 500000, 0)
+               
+               -- Força de expulsão lateral
+               local f = Instance.new("BodyVelocity")
+               f.Velocity = Vector3.new(500, 0, 500)
+               f.MaxForce = Vector3.new(1000, 0, 1000)
+               f.Parent = hrp
+               task.wait(0.05)
+               f:Destroy()
+               
+               RunService.Heartbeat:Wait()
             end
-            RunService.Stepped:Wait()
-         end
-         -- Devolve a colisão ao desligar
-         if lp.Character then
-            for _, part in pairs(lp.Character:GetDescendants()) do
-               if part:IsA("BasePart") then
-                  part.CanCollide = true
+            
+            -- Limpeza ao desligar
+            if trava then trava:Destroy() end
+            if lp.Character then
+               for _, part in pairs(lp.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = true end
                end
             end
-         end
-      end)
-
-      -- Loop da Força de Expulsão
-      task.spawn(function()
-         while _G.FlingAura do
-            local hrp = lp.Character.HumanoidRootPart
-            local vel = hrp.Velocity
-            -- Faz o personagem girar loucamente, mas mantém a posição estável no seu pé
-            hrp.Velocity = Vector3.new(0, 0, 0) -- Reseta a sua subida
-            hrp.RotVelocity = Vector3.new(0, 1000000, 0) -- Gira apenas no eixo Y para não capotar
-            
-            -- Cria uma pequena "explosão" de física constante ao redor
-            local bodyVel = Instance.new("BodyVelocity")
-            bodyVel.Velocity = Vector3.new(10000, 10000, 10000)
-            bodyVel.MaxForce = Vector3.new(10000, 10000, 10000)
-            bodyVel.Parent = hrp
-            task.wait(0.1)
-            bodyVel:Destroy()
-            
-            RunService.Heartbeat:Wait()
-         end
-      end)
+         end)
+      end
    end,
 })
 
 TabAura:CreateToggle({
    Name = "Furacão de Objetos (40 Itens) 🌪️",
    CurrentValue = false,
-   Flag = "ObjectTornado",
    Callback = function(Value)
       _G.Tornado = Value
       local angulo = 0
@@ -126,7 +110,7 @@ TabAura:CreateToggle({
                if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(lp.Character) then
                   if count > 40 then break end
                   v.Velocity = Vector3.new(0, 50, 0)
-                  v.CFrame = lp.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angulo + count) * 15, 5, math.sin(angulo + count) * 15)
+                  v.CFrame = lp.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angulo+count)*15, 5, math.sin(angulo+count)*15)
                   count = count + 1
                end
             end
@@ -136,43 +120,9 @@ TabAura:CreateToggle({
    end,
 })
 
--- --- ABA MUNDO/EXTRAS ---
-local TabMundo = Window:CreateTab("Mundo 🌎", 4483362458)
-
-TabMundo:CreateToggle({
-   Name = "Revelar Meteoros e Raios ⚡",
-   CurrentValue = false,
-   Flag = "DisasterESP",
-   Callback = function(Value)
-      _G.DisasterESP = Value
-      task.spawn(function()
-         while _G.DisasterESP do
-            for _, v in pairs(workspace:GetDescendants()) do
-               if v.Name == "Meteor" or v.Name == "LightningStrike" then
-                  if not v:FindFirstChild("Highlight") then
-                     local hl = Instance.new("Highlight", v)
-                     hl.FillColor = Color3.fromRGB(255, 0, 0)
-                  end
-               end
-            end
-            task.wait(0.5)
-         end
-      end)
-   end,
-})
-
 -- --- ABA CONFIGURAÇÕES ---
 local TabConfig = Window:CreateTab("Configurações ⚙️", 4483362458)
-
 TabConfig:CreateButton({
    Name = "Destruir Menu ❌",
-   Callback = function()
-      Rayfield:Destroy()
-   end,
-})
-
-Rayfield:Notify({
-   Title = "MENU CARREGADO",
-   Content = "Luiz Menu V1: Fling e Noclip estabilizados!",
-   Duration = 5,
+   Callback = function() Rayfield:Destroy() end,
 })
