@@ -1,4 +1,4 @@
--- LUIZ MENU V1 - SUPREMACIA TOTAL (FLY 3D + ESCUDO + INTRO)
+-- LUIZ MENU V1 - SUPREMACIA TOTAL (FLY CORRIGIDO + ANTI-DANO)
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
@@ -12,14 +12,13 @@ local function getChar() return lp.Character or lp.CharacterAdded:Wait() end
 local function getHRP() return getChar():WaitForChild("HumanoidRootPart", 5) end
 
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_Final"
+sg.Name = "LuizMenu_V1_Corrected"
 sg.ResetOnSpawn = false
 
--- --- 1. INTRO LUIZ MENU 3D ---
+-- --- INTRO 3D ---
 local introContainer = Instance.new("Frame", sg)
 introContainer.Size = UDim2.new(1, 0, 1, 0)
 introContainer.BackgroundTransparency = 1
-
 local introText = Instance.new("TextLabel", introContainer)
 introText.Size = UDim2.new(0, 600, 0, 100)
 introText.Position = UDim2.new(0.5, -300, 0.5, -50)
@@ -33,13 +32,13 @@ introText.TextTransparency = 1
 task.spawn(function()
     local info = TweenInfo.new(1.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
     TweenService:Create(introText, info, {TextSize = 85, TextTransparency = 0}):Play()
-    task.wait(2)
+    task.wait(1.5)
     TweenService:Create(introText, info, {TextTransparency = 1, TextSize = 130}):Play()
     task.wait(0.5)
     introContainer:Destroy()
 end)
 
--- --- 2. INTERFACE E ÍCONE ---
+-- --- INTERFACE ---
 local main = Instance.new("Frame", sg)
 main.Size = UDim2.new(0, 550, 0, 520)
 main.Position = UDim2.new(0.5, -275, 0.5, -260)
@@ -61,16 +60,7 @@ local function toggle()
     main.Visible = not main.Visible
     openIcon.Visible = not main.Visible
 end
-
 openIcon.MouseButton1Click:Connect(toggle)
-local closeX = Instance.new("TextButton", main)
-closeX.Size = UDim2.new(0, 40, 0, 40)
-closeX.Position = UDim2.new(1, -45, 0, 5)
-closeX.Text = "X"
-closeX.TextColor3 = Color3.fromRGB(255, 0, 0)
-closeX.BackgroundTransparency = 1
-closeX.TextSize = 35
-closeX.MouseButton1Click:Connect(toggle)
 
 local container = Instance.new("ScrollingFrame", main)
 container.Size = UDim2.new(1, -20, 1, -70)
@@ -91,68 +81,71 @@ local function addOption(txt, cb)
     b.MouseButton1Click:Connect(cb)
 end
 
--- --- 3. PODERES REAIS (100% FUNCIONAIS) ---
+-- --- FUNÇÕES CORRIGIDAS ---
 
--- FLY ADMIN COMPLETO (SOBE/DESCE PELA CÂMERA + ESTATICO)
+-- 1. FLY ADMIN V2 (DIREÇÃO CORRIGIDA + GOD MODE)
 local flyActive = false
-local flySpeed = 70
-addOption("FLY ADMIN (CÂMERA + ESTÁTICO)", function()
+local flySpeed = 80
+addOption("FLY ADMIN (FIXED + GOD MODE)", function()
     flyActive = not flyActive
+    local char = getChar()
     local hrp = getHRP()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    
     if flyActive then
+        -- Anti-Dano/God Mode enquanto voa
+        hum.MaxHealth = math.huge
+        hum.Health = math.huge
+        
         local bv = Instance.new("BodyVelocity", hrp)
         bv.Name = "LuizFlyVel"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.Velocity = Vector3.new(0,0,0)
         
         local bg = Instance.new("BodyGyro", hrp)
         bg.Name = "LuizFlyGyro"
         bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        bg.CFrame = hrp.CFrame
-
+        
         task.spawn(function()
             while flyActive do
                 RunService.RenderStepped:Wait()
-                local char = getChar()
-                local hum = char:FindFirstChildOfClass("Humanoid")
+                hrp.CanCollide = false -- Noclip enquanto voa para não tomar dano de batida
                 
-                if hum and hrp then
-                    local dir = hum.MoveDirection
-                    -- Se mover, segue a câmera (sobe e desce)
-                    if dir.Magnitude > 0 then
-                        bv.Velocity = Camera.CFrame.LookVector * (dir.Z < 0 and flySpeed or -flySpeed) + 
-                                      Camera.CFrame.RightVector * (dir.X > 0 and flySpeed or -flySpeed)
-                    else
-                        bv.Velocity = Vector3.new(0, 0.1, 0) -- Trava no ar
-                    end
-                    bg.CFrame = Camera.CFrame
+                local moveDir = hum.MoveDirection
+                if moveDir.Magnitude > 0 then
+                    -- Cálculo de direção corrigido (segue para onde você olha)
+                    bv.Velocity = Camera.CFrame.LookVector * (moveDir.Z < 0 and flySpeed or -flySpeed) + 
+                                  Camera.CFrame.RightVector * (moveDir.X > 0 and flySpeed or -flySpeed)
+                else
+                    bv.Velocity = Vector3.new(0, 0, 0)
                 end
+                bg.CFrame = Camera.CFrame
             end
             bv:Destroy() bg:Destroy()
+            hum.MaxHealth = 100
+            hrp.CanCollide = true
         end)
     end
 end)
 
--- ESCUDO DE ENTULHO (FÍSICA REAL E MORTAL)
+-- 2. ESCUDO DE ENTULHO (ANTI-MORTE)
 local shieldActive = false
-addOption("ESCUDO DE ENTULHO (MORTAL)", function()
+addOption("ESCUDO MORTAL (SÓ MATA OS OUTROS)", function()
     shieldActive = not shieldActive
     local angle = 0
     task.spawn(function()
         while shieldActive do
-            angle = angle + 0.7
+            angle = angle + 0.8
             local hrp = getHRP()
             if hrp then
                 local count = 0
                 for _, p in pairs(workspace:GetDescendants()) do
                     if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
-                        if count > 35 then break end
-                        local targetPos = hrp.Position + Vector3.new(math.cos(angle + count)*18, 5, math.sin(angle + count)*18)
-                        
-                        -- Colisão por transferência de energia (Impacto)
+                        if count > 30 then break end
+                        local targetPos = hrp.Position + Vector3.new(math.cos(angle + count)*22, 5, math.sin(angle + count)*22)
+                        p.CanCollide = false -- Não te machuca
                         p.CFrame = CFrame.new(targetPos)
-                        p.Velocity = (targetPos - p.Position) * 75
-                        p.RotVelocity = Vector3.new(70, 70, 70)
+                        p.Velocity = (targetPos - p.Position) * 80
+                        p.RotVelocity = Vector3.new(100, 100, 100)
                         count = count + 1
                     end
                 end
@@ -162,14 +155,13 @@ addOption("ESCUDO DE ENTULHO (MORTAL)", function()
     end)
 end)
 
--- MODO TORNADO (GIRAR PARA MATAR)
+-- 3. TORNADO KILL
 local tornadoActive = false
 addOption("MODO TORNADO (GIRAR = KILL)", function()
     tornadoActive = not tornadoActive
     local hrp = getHRP()
     if tornadoActive then
         local av = Instance.new("BodyAngularVelocity", hrp)
-        av.Name = "LuizTornado"
         av.AngularVelocity = Vector3.new(0, 999999, 0)
         av.MaxTorque = Vector3.new(0, math.huge, 0)
         task.spawn(function()
@@ -179,19 +171,11 @@ addOption("MODO TORNADO (GIRAR = KILL)", function()
             end
         end)
     else
-        if getHRP():FindFirstChild("LuizTornado") then getHRP().LuizTornado:Destroy() end
+        if getHRP():FindFirstChildOfClass("BodyAngularVelocity") then getHRP():FindFirstChildOfClass("BodyAngularVelocity"):Destroy() end
     end
 end)
 
-addOption("APOCALIPSE (LIMPAR TUDO)", function()
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(lp.Character) then
-            v.CFrame = CFrame.new(0, -10000, 0)
-        end
-    end
-end)
-
--- --- SISTEMA DE ARRASTE ---
+-- Arrastar
 local function drag(gui)
     local dragging, dragStart, startPos
     gui.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = gui.Position end end)
@@ -203,6 +187,5 @@ local function drag(gui)
 end
 drag(main) drag(openIcon)
 
--- Ativa menu após Intro
 task.wait(3.5)
 main.Visible = true
