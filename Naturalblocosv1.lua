@@ -1,9 +1,9 @@
--- LUIZ MENU V1 - DELTA SUPREMACIA (FLING ANTI-AFUNDAR)
+-- LUIZ MENU V1 - OMNI DELTA (ANTI-RESISTÊNCIA)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "LUIZ MENU V1 👑",
-   LoadingTitle = "Corrigindo Físicas Delta...",
+   LoadingTitle = "Quebrando Defesas...",
    LoadingSubtitle = "por Luiz",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false
@@ -13,11 +13,11 @@ local lp = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
--- --- ABA 1: PVP ELITE 🎯 ---
+-- --- ABA 1: PVP ELITE (ARMAS) 🎯 ---
 local TabPvP = Window:CreateTab("PvP Elite 🎯", 4483362458)
 
 TabPvP:CreateToggle({
-   Name = "Aimbot Lock-On 🔫",
+   Name = "Mira Automática (Aimbot) 🔫",
    CurrentValue = false,
    Callback = function(Value)
       _G.Aimbot = Value
@@ -77,21 +77,19 @@ TabSobrevivencia:CreateToggle({
    end,
 })
 
--- --- ABA 3: AURA (FLING ANTI-AFUNDAR) ♾️ ---
+-- --- ABA 3: AURA (FLING DE ELITE - PEGA TODOS) ♾️ ---
 local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
 
 TabAura:CreateToggle({
-   Name = "Fling Assassino (Estabilizado) 🌀",
+   Name = "Fling Supremacia (Pega Todos) 🌀",
    CurrentValue = false,
    Callback = function(Value)
       _G.Fling = Value
-      
       if Value then
          task.spawn(function()
-            -- Criar Força Anti-Gravidade para não afundar
+            -- Trava de altura para não afundar no Delta
             local float = Instance.new("BodyVelocity")
-            float.Name = "AntiAfundar"
-            float.MaxForce = Vector3.new(0, math.huge, 0) -- Trava apenas a altura
+            float.MaxForce = Vector3.new(0, math.huge, 0)
             float.Velocity = Vector3.new(0, 0, 0)
             float.Parent = lp.Character.HumanoidRootPart
 
@@ -99,34 +97,38 @@ TabAura:CreateToggle({
                if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
                   local hrp = lp.Character.HumanoidRootPart
                   
-                  -- Noclip constante
+                  -- Noclip Constante
                   for _, v in pairs(lp.Character:GetDescendants()) do
                      if v:IsA("BasePart") then v.CanCollide = false end
                   end
                   
-                  -- Gira muito rápido mas o 'float' te segura na superfície
-                  hrp.RotVelocity = Vector3.new(0, 5000, 0)
-                  
-                  -- Força lateral para empurrar os outros
-                  hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+                  -- Rotação e Velocidade de Impacto
+                  hrp.RotVelocity = Vector3.new(0, 10000, 0)
+                  hrp.Velocity = Vector3.new(0, 0, 0) -- Mantém estabilidade móvel
+
+                  -- ATAQUE ATIVO: Forçar Fling em quem está perto (Ignora scripts de defesa)
+                  for _, p in pairs(game.Players:GetPlayers()) do
+                     if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local pRoot = p.Character.HumanoidRootPart
+                        local dist = (hrp.Position - pRoot.Position).Magnitude
+                        if dist < 8 then
+                           -- Força um choque de física que quebra o Network Ownership deles
+                           pRoot.Velocity = Vector3.new(50000, 50000, 50000)
+                           pRoot.RotVelocity = Vector3.new(50000, 50000, 50000)
+                        end
+                     end
+                  end
                end
                RunService.Heartbeat:Wait()
             end
-            
-            -- Limpeza ao desligar
-            if float then float:Destroy() end
-            if lp.Character then
-               for _, v in pairs(lp.Character:GetDescendants()) do
-                  if v:IsA("BasePart") then v.CanCollide = true end
-               end
-            end
+            float:Destroy()
          end)
       end
    end,
 })
 
 TabAura:CreateToggle({
-   Name = "Tornado de Objetos 🌪️",
+   Name = "Tornado de Objetos (40 itens) 🌪️",
    CurrentValue = false,
    Callback = function(Value)
       _G.Tornado = Value
@@ -169,8 +171,8 @@ TabMundo:CreateToggle({
    end,
 })
 
--- --- ABA 5: CONFIGURAÇÕES ⚙️ ---
+-- --- ABA 5: CONFIG ⚙️ ---
 local TabConfig = Window:CreateTab("Config ⚙️", 4483362458)
 TabConfig:CreateButton({ Name = "Fechar Menu ❌", Callback = function() Rayfield:Destroy() end })
 
-Rayfield:Notify({Title = "FIX APLICADO", Content = "Fling agora tem trava de altura! Você não vai mais afundar.", Duration = 5})
+Rayfield:Notify({Title = "FLING ATUALIZADO", Content = "Agora o Fling força a velocidade nos outros players!", Duration = 5})
