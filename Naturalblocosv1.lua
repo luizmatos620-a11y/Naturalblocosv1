@@ -1,9 +1,9 @@
--- LUIZ MENU V1 - DELTA ESTÁVEL (ANTI-CAPOTAR)
+-- LUIZ MENU V1 - OMNI HERO EDITION (DELTA/MOBILE)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "LUIZ MENU V1 👑",
-   LoadingTitle = "Estabilizando Giroscópios...",
+   LoadingTitle = "Injetando Protocolo Herói...",
    LoadingSubtitle = "por Luiz",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false
@@ -12,8 +12,70 @@ local Window = Rayfield:CreateWindow({
 local lp = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+local Mouse = lp:GetMouse()
 
--- --- ABA 1: PVP ELITE (ARMAS) 🎯 ---
+-- --- ABA SOBREVIVENTES (HERÓI & BALÃO) ---
+local TabHeroi = Window:CreateTab("Sobreviventes 🛡️", 4483362458)
+
+TabHeroi:CreateToggle({
+   Name = "Voo do Superman 🦸‍♂️",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.FlyHero = Value
+      local char = lp.Character
+      local hrp = char.HumanoidRootPart
+      
+      if Value then
+         local bg = Instance.new("BodyGyro", hrp)
+         bg.P = 9e4
+         bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+         bg.CFrame = hrp.CFrame
+         
+         local bv = Instance.new("BodyVelocity", hrp)
+         bv.Velocity = Vector3.new(0,0.1,0)
+         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+         
+         task.spawn(function()
+            local tempo = 0
+            while _G.FlyHero do
+               tempo = tempo + 0.1
+               local speed = 50
+               local moveDir = char.Humanoid.MoveDirection
+               
+               -- Animação de Subir/Descer (Idle Hero)
+               local idleOffset = math.sin(tempo * 2) * 0.5
+               
+               if moveDir.Magnitude > 0 then
+                  bv.Velocity = moveDir * speed
+                  bg.CFrame = CFrame.new(hrp.Position, hrp.Position + moveDir) * CFrame.Angles(math.rad(-30), 0, 0)
+               else
+                  bv.Velocity = Vector3.new(0, idleOffset, 0)
+                  bg.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + Camera.CFrame.LookVector * 10)
+               end
+               RunService.RenderStepped:Wait()
+            end
+            bg:Destroy()
+            bv:Destroy()
+         end)
+      end
+   end,
+})
+
+TabHeroi:CreateButton({
+   Name = "Ativar Balão Mágico 🎈",
+   Callback = function()
+      local bf = Instance.new("BodyForce", lp.Character.HumanoidRootPart)
+      bf.Force = Vector3.new(0, workspace.Gravity * lp.Character.HumanoidRootPart:GetMass() * 0.9, 0)
+      Rayfield:Notify({Title = "Balão Ativado", Content = "Flutuando suavemente!", Duration = 3})
+   end,
+})
+
+TabHeroi:CreateButton({
+   Name = "Teleporte: Ilha Segura 🏝️",
+   Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 180, 380) end,
+})
+
+-- --- ABA PVP ELITE (ARMAS) 🎯 ---
 local TabPvP = Window:CreateTab("PvP Elite 🎯", 4483362458)
 
 TabPvP:CreateToggle({
@@ -47,93 +109,49 @@ TabPvP:CreateButton({
       for _, p in pairs(game.Players:GetPlayers()) do
          if p ~= lp and p.Character then
             local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then hrp.Size = Vector3.new(15, 15, 15) hrp.Transparency = 0.7 hrp.CanCollide = false end
+            if hrp then hrp.Size = Vector3.new(15, 15, 15) hrp.Transparency = 0.7 end
          end
       end
    end,
 })
 
--- --- ABA 2: SOBREVIVENTES 🛡️ ---
-local TabSobrevivencia = Window:CreateTab("Sobreviventes 🛡️", 4483362458)
-
-TabSobrevivencia:CreateButton({
-   Name = "Teleporte: Ilha Segura 🏝️",
-   Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 180, 380) end,
-})
-
-TabSobrevivencia:CreateToggle({
-   Name = "Sem Dano de Queda 🦴",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.NoFall = Value
-      task.spawn(function()
-         while _G.NoFall do
-            if lp.Character and lp.Character:FindFirstChild("FallDamageScript", true) then
-               lp.Character:FindFirstChild("FallDamageScript", true).Disabled = true
-            end
-            task.wait(1)
-         end
-      end)
-   end,
-})
-
--- --- ABA 3: AURA (FLING EIXO TRAVADO) ♾️ ---
+-- --- ABA AURA (FLING ESTÁVEL) ♾️ ---
 local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
 
 TabAura:CreateToggle({
-   Name = "Fling Estabilizado (Não Deita) 🌀",
+   Name = "Fling Supremacia (Anti-Deitar) 🌀",
    CurrentValue = false,
    Callback = function(Value)
       _G.Fling = Value
       if Value then
          task.spawn(function()
             local hrp = lp.Character.HumanoidRootPart
-            
-            -- Giroscópio para manter o boneco EM PÉ (90 graus)
-            local gyro = Instance.new("BodyGyro")
+            local gyro = Instance.new("BodyGyro", hrp)
             gyro.P = 9e4
-            gyro.MaxTorque = Vector3.new(9e9, 0, 9e9) -- Trava os eixos X e Z (não capota)
-            gyro.CFrame = hrp.CFrame
-            gyro.Parent = hrp
-
-            -- Força para não afundar
-            local float = Instance.new("BodyVelocity")
-            float.MaxForce = Vector3.new(0, math.huge, 0)
-            float.Velocity = Vector3.new(0, 0, 0)
-            float.Parent = hrp
-
+            gyro.MaxTorque = Vector3.new(9e9, 0, 9e9)
+            
             while _G.Fling do
-               if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                  -- Noclip constante
-                  for _, v in pairs(lp.Character:GetDescendants()) do
-                     if v:IsA("BasePart") then v.CanCollide = false end
-                  end
-                  
-                  -- Rotação apenas no eixo Y (Vertical)
-                  hrp.RotVelocity = Vector3.new(0, 10000, 0)
-                  
-                  -- Ataque Ativo nos players próximos
-                  for _, p in pairs(game.Players:GetPlayers()) do
-                     if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        local pRoot = p.Character.HumanoidRootPart
-                        if (hrp.Position - pRoot.Position).Magnitude < 8 then
-                           pRoot.Velocity = Vector3.new(50000, 50000, 50000)
-                        end
+               for _, v in pairs(lp.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+               hrp.RotVelocity = Vector3.new(0, 10000, 0)
+               hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z) -- Impede afundar
+               
+               for _, p in pairs(game.Players:GetPlayers()) do
+                  if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                     if (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude < 8 then
+                        p.Character.HumanoidRootPart.Velocity = Vector3.new(50000, 50000, 50000)
                      end
                   end
                end
                RunService.Heartbeat:Wait()
             end
-            
             gyro:Destroy()
-            float:Destroy()
          end)
       end
    end,
 })
 
 TabAura:CreateToggle({
-   Name = "Tornado de Objetos 🌪️",
+   Name = "Furacão de Objetos (40 itens) 🌪️",
    CurrentValue = false,
    Callback = function(Value)
       _G.Tornado = Value
@@ -155,9 +173,8 @@ TabAura:CreateToggle({
    end,
 })
 
--- --- ABA 4: MUNDO 🌎 ---
+-- --- ABA MUNDO & CONFIG ---
 local TabMundo = Window:CreateTab("Mundo 🌎", 4483362458)
-
 TabMundo:CreateToggle({
    Name = "Aviso de Meteoros/Raios ⚡",
    CurrentValue = false,
@@ -176,8 +193,7 @@ TabMundo:CreateToggle({
    end,
 })
 
--- --- ABA 5: CONFIGURAÇÕES ⚙️ ---
-local TabConfig = Window:CreateTab("Config ⚙️", 4483362458)
+local TabConfig = Window:CreateTab("Configurações ⚙️", 4483362458)
 TabConfig:CreateButton({ Name = "Fechar Menu ❌", Callback = function() Rayfield:Destroy() end })
 
-Rayfield:Notify({Title = "ESTABILIDADE OK", Content = "Giroscópio ativado. Você não vai mais capotar!", Duration = 5})
+Rayfield:Notify({Title = "MONSTRO COMPLETO", Content = "Fly Hero, Balão e Aura Ativados!", Duration = 5})
