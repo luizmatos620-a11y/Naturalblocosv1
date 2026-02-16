@@ -1,9 +1,9 @@
--- LUIZ MENU V1 - OMNI HERO EDITION (DELTA/MOBILE)
+-- LUIZ MENU V1 - OMNI HERO & REAL TORNADO (DELTA/MOBILE)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "LUIZ MENU V1 👑",
-   LoadingTitle = "Injetando Protocolo Herói...",
+   LoadingTitle = "Injetando Física de Colisão...",
    LoadingSubtitle = "por Luiz",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false
@@ -12,7 +12,49 @@ local Window = Rayfield:CreateWindow({
 local lp = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
-local Mouse = lp:GetMouse()
+
+-- --- ABA TORNADO (LIQUIDIFICADOR REAL) ---
+local TabTornado = Window:CreateTab("Tornado Real 🌪️", 4483362458)
+
+TabTornado:CreateToggle({
+   Name = "Liquidificador de Spawn 🌀",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.RealTornado = Value
+      local angulo = 0
+      
+      task.spawn(function()
+         while _G.RealTornado do
+            angulo = angulo + 0.4
+            local contador = 0
+            
+            -- Raio de busca focado no Spawn (Ilha principal)
+            for _, item in pairs(workspace:GetDescendants()) do
+               if item:IsA("BasePart") and not item.Anchored and not item:IsDescendantOf(lp.Character) then
+                  -- Filtro: Apenas objetos pequenos (tamanho menor que 7)
+                  if item.Size.Magnitude < 10 then
+                     -- Filtro de Distância: Apenas se estiver perto do jogador (ou no spawn)
+                     local dist = (lp.Character.HumanoidRootPart.Position - item.Position).Magnitude
+                     if dist < 50 then
+                        if contador > 50 then break end
+                        
+                        -- Física de Liquidificador (Orbital)
+                        local targetPos = lp.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angulo + contador) * 12, 2 + math.sin(angulo * 0.5) * 5, math.sin(angulo + contador) * 12).Position
+                        
+                        -- Aplica Velocidade Real (Pra não ser só visual)
+                        item.Velocity = (targetPos - item.Position) * 30
+                        item.RotVelocity = Vector3.new(20, 20, 20)
+                        
+                        contador = contador + 1
+                     end
+                  end
+               end
+            end
+            RunService.Heartbeat:Wait()
+         end
+      end)
+   end,
+})
 
 -- --- ABA SOBREVIVENTES (HERÓI & BALÃO) ---
 local TabHeroi = Window:CreateTab("Sobreviventes 🛡️", 4483362458)
@@ -22,86 +64,77 @@ TabHeroi:CreateToggle({
    CurrentValue = false,
    Callback = function(Value)
       _G.FlyHero = Value
-      local char = lp.Character
-      local hrp = char.HumanoidRootPart
-      
       if Value then
+         local hrp = lp.Character.HumanoidRootPart
          local bg = Instance.new("BodyGyro", hrp)
          bg.P = 9e4
          bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-         bg.CFrame = hrp.CFrame
-         
          local bv = Instance.new("BodyVelocity", hrp)
-         bv.Velocity = Vector3.new(0,0.1,0)
          bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
          
          task.spawn(function()
-            local tempo = 0
+            local t = 0
             while _G.FlyHero do
-               tempo = tempo + 0.1
-               local speed = 50
-               local moveDir = char.Humanoid.MoveDirection
-               
-               -- Animação de Subir/Descer (Idle Hero)
-               local idleOffset = math.sin(tempo * 2) * 0.5
-               
+               t = t + 0.1
+               local moveDir = lp.Character.Humanoid.MoveDirection
                if moveDir.Magnitude > 0 then
-                  bv.Velocity = moveDir * speed
+                  bv.Velocity = moveDir * 60
                   bg.CFrame = CFrame.new(hrp.Position, hrp.Position + moveDir) * CFrame.Angles(math.rad(-30), 0, 0)
                else
-                  bv.Velocity = Vector3.new(0, idleOffset, 0)
+                  bv.Velocity = Vector3.new(0, math.sin(t * 2) * 0.6, 0)
                   bg.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + Camera.CFrame.LookVector * 10)
                end
-               RunService.RenderStepped:Wait()
+               task.wait()
             end
-            bg:Destroy()
-            bv:Destroy()
+            bg:Destroy() bv:Destroy()
          end)
       end
    end,
 })
 
 TabHeroi:CreateButton({
-   Name = "Ativar Balão Mágico 🎈",
+   Name = "Ativar Balão 🎈",
    Callback = function()
       local bf = Instance.new("BodyForce", lp.Character.HumanoidRootPart)
       bf.Force = Vector3.new(0, workspace.Gravity * lp.Character.HumanoidRootPart:GetMass() * 0.9, 0)
-      Rayfield:Notify({Title = "Balão Ativado", Content = "Flutuando suavemente!", Duration = 3})
    end,
 })
 
-TabHeroi:CreateButton({
-   Name = "Teleporte: Ilha Segura 🏝️",
-   Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 180, 380) end,
-})
+-- --- ABA AURA (FLING ESTÁVEL) ---
+local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
 
--- --- ABA PVP ELITE (ARMAS) 🎯 ---
-local TabPvP = Window:CreateTab("PvP Elite 🎯", 4483362458)
-
-TabPvP:CreateToggle({
-   Name = "Aimbot Lock-On 🔫",
+TabAura:CreateToggle({
+   Name = "Fling Supremacia 🌀",
    CurrentValue = false,
    Callback = function(Value)
-      _G.Aimbot = Value
-      task.spawn(function()
-         while _G.Aimbot do
-            local target = nil
-            local dist = 180
-            for _, p in pairs(game.Players:GetPlayers()) do
-               if p ~= lp and p.Character and p.Character:FindFirstChild("Head") then
-                  local pos, vis = Camera:WorldToViewportPoint(p.Character.Head.Position)
-                  if vis then
-                     local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-                     if mDist < dist then dist = mDist target = p end
+      _G.Fling = Value
+      if Value then
+         task.spawn(function()
+            local hrp = lp.Character.HumanoidRootPart
+            local gyro = Instance.new("BodyGyro", hrp)
+            gyro.MaxTorque = Vector3.new(9e9, 0, 9e9) -- Impede de deitar
+            while _G.Fling do
+               for _, v in pairs(lp.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+               hrp.RotVelocity = Vector3.new(0, 15000, 0)
+               hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+               
+               for _, p in pairs(game.Players:GetPlayers()) do
+                  if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                     if (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude < 8 then
+                        p.Character.HumanoidRootPart.Velocity = Vector3.new(60000, 60000, 60000)
+                     end
                   end
                end
+               RunService.Heartbeat:Wait()
             end
-            if target then Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target.Character.Head.Position), 0.1) end
-            task.wait()
-         end
-      end)
+            gyro:Destroy()
+         end)
+      end
    end,
 })
+
+-- --- ABA MUNDO & PVP ---
+local TabPvP = Window:CreateTab("PvP & Mundo 🌎", 4483362458)
 
 TabPvP:CreateButton({
    Name = "Hitbox Gigante 📦",
@@ -115,68 +148,8 @@ TabPvP:CreateButton({
    end,
 })
 
--- --- ABA AURA (FLING ESTÁVEL) ♾️ ---
-local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
-
-TabAura:CreateToggle({
-   Name = "Fling Supremacia (Anti-Deitar) 🌀",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.Fling = Value
-      if Value then
-         task.spawn(function()
-            local hrp = lp.Character.HumanoidRootPart
-            local gyro = Instance.new("BodyGyro", hrp)
-            gyro.P = 9e4
-            gyro.MaxTorque = Vector3.new(9e9, 0, 9e9)
-            
-            while _G.Fling do
-               for _, v in pairs(lp.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
-               hrp.RotVelocity = Vector3.new(0, 10000, 0)
-               hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z) -- Impede afundar
-               
-               for _, p in pairs(game.Players:GetPlayers()) do
-                  if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                     if (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude < 8 then
-                        p.Character.HumanoidRootPart.Velocity = Vector3.new(50000, 50000, 50000)
-                     end
-                  end
-               end
-               RunService.Heartbeat:Wait()
-            end
-            gyro:Destroy()
-         end)
-      end
-   end,
-})
-
-TabAura:CreateToggle({
-   Name = "Furacão de Objetos (40 itens) 🌪️",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.Tornado = Value
-      local a = 0
-      task.spawn(function()
-         while _G.Tornado do
-            a = a + 0.3
-            local c = 0
-            for _, v in pairs(workspace:GetDescendants()) do
-               if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(lp.Character) then
-                  if c > 40 then break end
-                  v.CFrame = lp.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(a+c)*15, 5, math.sin(a+c)*15)
-                  c = c + 1
-               end
-            end
-            task.wait()
-         end
-      end)
-   end,
-})
-
--- --- ABA MUNDO & CONFIG ---
-local TabMundo = Window:CreateTab("Mundo 🌎", 4483362458)
-TabMundo:CreateToggle({
-   Name = "Aviso de Meteoros/Raios ⚡",
+TabPvP:CreateToggle({
+   Name = "Aviso de Desastres ⚡",
    CurrentValue = false,
    Callback = function(Value)
       _G.ESP = Value
@@ -193,7 +166,4 @@ TabMundo:CreateToggle({
    end,
 })
 
-local TabConfig = Window:CreateTab("Configurações ⚙️", 4483362458)
-TabConfig:CreateButton({ Name = "Fechar Menu ❌", Callback = function() Rayfield:Destroy() end })
-
-Rayfield:Notify({Title = "MONSTRO COMPLETO", Content = "Fly Hero, Balão e Aura Ativados!", Duration = 5})
+Rayfield:Notify({Title = "TORNADO FIXADO", Content = "O liquidificador agora usa física real no spawn!", Duration = 5})
