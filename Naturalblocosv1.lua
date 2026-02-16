@@ -6,10 +6,10 @@ local lp = Players.LocalPlayer
 
 -- Criar ScreenGui
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_Final_Edition"
+sg.Name = "LuizMenu_V1_Final"
 sg.ResetOnSpawn = false
 
--- --- 1. INTRO LUIZ MENU V1 (Efeito 3D) ---
+-- --- 1. INTRO LUIZ MENU V1 ---
 local introContainer = Instance.new("Frame", sg)
 introContainer.Size = UDim2.new(1, 0, 1, 0)
 introContainer.BackgroundTransparency = 1
@@ -68,7 +68,7 @@ content.Size = UDim2.new(1, -190, 1, -20)
 content.Position = UDim2.new(0, 180, 0, 10)
 content.BackgroundTransparency = 1
 
--- Ícone de Abrir (Caveira Arrastável)
+-- Ícone de Abrir (Caveira)
 local openIcon = Instance.new("ImageButton", sg)
 openIcon.Size = UDim2.new(0, 65, 0, 65)
 openIcon.Position = UDim2.new(0, 20, 0.5, -32)
@@ -115,77 +115,57 @@ local function addOption(parent, txt, cb)
     b.MouseButton1Click:Connect(cb)
 end
 
--- --- 4. ABAS E FUNÇÕES ---
+-- --- 4. ABAS E FUNÇÕES COMPLETAS ---
 local desastrePage = createTab("Desastres")
-local playerPage = createTab("Player")
-local bringPage = createTab("Bring")
+local tpPage = createTab("Teleport Pro")
 local trollPage = createTab("Troll")
-local serverPage = createTab("Servidor")
+local playerPage = createTab("Player")
 
--- DESASTRES (OBJECT KILL ANTI-LAG)
-_G.PartKill = false
-addOption(desastrePage, "Chuva Objetos (ANTI-LAG)", function()
-    _G.PartKill = not _G.PartKill
+-- ABA DESASTRES (VÓRTICE E ANTI-LAG)
+_G.Vortex = false
+addOption(desastrePage, "Furacão no Spawn (Vórtice)", function()
+    _G.Vortex = not _G.Vortex
+    local spawnPos = Vector3.new(-285, 180, 375)
+    local angle = 0
     task.spawn(function()
-        while _G.PartKill do
-            local partsMoved = 0
+        while _G.Vortex do
+            angle = angle + 0.4
+            local count = 0
             for _, p in pairs(workspace:GetDescendants()) do
-                if partsMoved > 15 then break end -- Limite para não travar celular
+                if count > 20 then break end
                 if p:IsA("BasePart") and not p.Anchored and p:IsA("Part") then
-                    for _, target in pairs(Players:GetPlayers()) do
-                        if target ~= lp and target.Character and target.Character:FindFirstChild("Head") then
-                            p.CFrame = target.Character.Head.CFrame
-                            p.Velocity = Vector3.new(0, 300, 0)
-                            partsMoved = partsMoved + 1
-                        end
-                    end
+                    local x = math.cos(angle) * 25
+                    local z = math.sin(angle) * 25
+                    p.CFrame = CFrame.new(spawnPos + Vector3.new(x, 8, z))
+                    p.Velocity = Vector3.new(0, 60, 0)
+                    count = count + 1
                 end
             end
-            task.wait(0.25)
-        end
-    end)
-end)
-addOption(desastrePage, "Ilha Segura", function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 175, 375) end)
-addOption(desastrePage, "Remover Dano Queda", function() lp.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false) end)
-
--- PLAYER
-addOption(playerPage, "Fly Estático (Céu)", function()
-    local hrp = lp.Character.HumanoidRootPart
-    if not hrp:FindFirstChild("LuizFly") then
-        local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "LuizFly"
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        hrp.CFrame = hrp.CFrame * CFrame.new(0, 70, 0)
-    else hrp.LuizFly:Destroy() end
-end)
-
-local noclip = false
-addOption(playerPage, "Noclip", function()
-    noclip = not noclip
-    RunService.Stepped:Connect(function()
-        if noclip and lp.Character then
-            for _, v in pairs(lp.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+            task.wait(0.03)
         end
     end)
 end)
 
--- BRING
-local bringInput = Instance.new("TextBox", bringPage)
-bringInput.Size = UDim2.new(1, -10, 0, 40)
-bringInput.PlaceholderText = "Nome do Jogador..."
-bringInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bringInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", bringInput)
+addOption(desastrePage, "Ilha Segura (Teleport)", function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-285, 175, 375) end)
 
-addOption(bringPage, "Puxar Player", function()
-    local t = bringInput.Text:lower()
-    for _, v in pairs(Players:GetPlayers()) do
-        if v.Name:lower():sub(1, #t) == t then v.Character.HumanoidRootPart.CFrame = lp.Character.HumanoidRootPart.CFrame end
-    end
+-- ABA TELEPORT PRO
+_G.TPLoop = false
+addOption(tpPage, "TP Loop All (Atropelar)", function()
+    _G.TPLoop = not _G.TPLoop
+    task.spawn(function()
+        while _G.TPLoop do
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    lp.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
+                    task.wait(0.1)
+                end
+            end
+            task.wait()
+        end
+    end)
 end)
 
--- TROLL (FLING SEGURO E AURA)
+-- ABA TROLL (FLING E AURA)
 local flinging = false
 addOption(trollPage, "Fling (Só eles voam)", function()
     flinging = not flinging
@@ -198,7 +178,7 @@ addOption(trollPage, "Fling (Só eles voam)", function()
         task.spawn(function()
             while flinging do
                 for _, v in pairs(lp.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end
-                task.wait()
+                RunService.Stepped:Wait()
             end
         end)
     else if hrp:FindFirstChild("LuizFling") then hrp.LuizFling:Destroy() end end
@@ -217,9 +197,16 @@ addOption(trollPage, "Kill Aura (Auto-Attack)", function()
     end
 end)
 
--- SERVIDOR
-addOption(serverPage, "Contar Jogadores", function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Servidor", Text = "Players Online: " .. #Players:GetPlayers()})
+-- ABA PLAYER (FLY E NOCLIP)
+addOption(playerPage, "Fly Estático (Céu)", function()
+    local hrp = lp.Character.HumanoidRootPart
+    if not hrp:FindFirstChild("LuizFly") then
+        local bv = Instance.new("BodyVelocity", hrp)
+        bv.Name = "LuizFly"
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        hrp.CFrame = hrp.CFrame * CFrame.new(0, 80, 0)
+    else hrp.LuizFly:Destroy() end
 end)
 
 -- --- SISTEMA DE ARRASTAR ---
