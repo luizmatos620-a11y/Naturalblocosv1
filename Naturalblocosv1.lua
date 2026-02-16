@@ -1,4 +1,4 @@
--- LUIZ MENU V1 - EDIÇÃO OMNI (INTERFACE FUTURISTA)
+-- LUIZ MENU V1 - EDIÇÃO OMNI (FLING FIXADO)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -49,7 +49,6 @@ TabSobrevivencia:CreateToggle({
 TabSobrevivencia:CreateButton({
    Name = "Ativar Balão Mágico 🎈",
    Callback = function()
-      -- Método alternativo: Se o item não entra na mochila, criamos a física do balão
       local bodyFloat = Instance.new("BodyForce")
       bodyFloat.Parent = lp.Character.HumanoidRootPart
       bodyFloat.Force = Vector3.new(0, game.Workspace.Gravity * lp.Character.HumanoidRootPart:GetMass() * 0.9, 0)
@@ -57,7 +56,7 @@ TabSobrevivencia:CreateButton({
    end,
 })
 
--- --- ABA AURA ---
+-- --- ABA AURA (FLING ARRUMADO COM NOCLIP) ---
 local TabAura = Window:CreateTab("AURA ♾️", 4483362458)
 
 TabAura:CreateToggle({
@@ -66,11 +65,46 @@ TabAura:CreateToggle({
    Flag = "FlingAura",
    Callback = function(Value)
       _G.FlingAura = Value
+      
+      -- Loop do Noclip e Estabilidade (Para você não voar junto)
+      task.spawn(function()
+         while _G.FlingAura do
+            if lp.Character then
+               for _, part in pairs(lp.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then
+                     part.CanCollide = false -- Noclip ativo
+                  end
+               end
+            end
+            RunService.Stepped:Wait()
+         end
+         -- Devolve a colisão ao desligar
+         if lp.Character then
+            for _, part in pairs(lp.Character:GetDescendants()) do
+               if part:IsA("BasePart") then
+                  part.CanCollide = true
+               end
+            end
+         end
+      end)
+
+      -- Loop da Força de Expulsão
       task.spawn(function()
          while _G.FlingAura do
             local hrp = lp.Character.HumanoidRootPart
-            hrp.Velocity = Vector3.new(999999, 999999, 999999)
-            hrp.RotVelocity = Vector3.new(999999, 999999, 999999)
+            local vel = hrp.Velocity
+            -- Faz o personagem girar loucamente, mas mantém a posição estável no seu pé
+            hrp.Velocity = Vector3.new(0, 0, 0) -- Reseta a sua subida
+            hrp.RotVelocity = Vector3.new(0, 1000000, 0) -- Gira apenas no eixo Y para não capotar
+            
+            -- Cria uma pequena "explosão" de física constante ao redor
+            local bodyVel = Instance.new("BodyVelocity")
+            bodyVel.Velocity = Vector3.new(10000, 10000, 10000)
+            bodyVel.MaxForce = Vector3.new(10000, 10000, 10000)
+            bodyVel.Parent = hrp
+            task.wait(0.1)
+            bodyVel:Destroy()
+            
             RunService.Heartbeat:Wait()
          end
       end)
@@ -139,7 +173,6 @@ TabConfig:CreateButton({
 
 Rayfield:Notify({
    Title = "MENU CARREGADO",
-   Content = "Luiz Menu V1 está pronto para dominar!",
+   Content = "Luiz Menu V1: Fling e Noclip estabilizados!",
    Duration = 5,
-   Image = 4483362458,
 })
