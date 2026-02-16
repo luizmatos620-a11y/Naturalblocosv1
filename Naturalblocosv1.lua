@@ -4,7 +4,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 
--- Anti-AFK (Impedir que seja expulso)
+-- Anti-AFK
 lp.Idled:Connect(function()
     game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
     task.wait(1)
@@ -12,15 +12,14 @@ lp.Idled:Connect(function()
 end)
 
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_GHOST_MODE"
+sg.Name = "LuizMenu_V1_Final_Apocalypse"
 sg.ResetOnSpawn = false
 
--- --- INTERFACE HACKER VERMELHA ---
+-- --- DESIGN HACKER VERMELHO ---
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 650, 0, 450) 
-main.Position = UDim2.new(0.5, -325, 0.5, -225)
+main.Size = UDim2.new(0, 650, 0, 480) 
+main.Position = UDim2.new(0.5, -325, 0.5, -240)
 main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-main.Visible = true
 main.BorderSizePixel = 2
 main.BorderColor3 = Color3.fromRGB(255, 0, 0)
 Instance.new("UICorner", main)
@@ -71,40 +70,54 @@ end
 
 -- --- FUNÇÕES DE DESTRUIÇÃO ---
 
--- 1. NOCLIP FANTASMA MORTAL (O QUE VOCÊ PEDIU)
+-- 1. GRAVIDADE ZERO (O QUE VOCÊ PEDIU - FAZ TUDO SUBIR)
+_G.AntiGrav = false
+addOption("GRAVIDADE ZERO (MAPA TODO)", function()
+    _G.AntiGrav = not _G.AntiGrav
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LUIZ MENU", Text = _G.AntiGrav and "TUDO ESTÁ SUBINDO!" or "GRAVIDADE NORMAL"})
+    
+    task.spawn(function()
+        while _G.AntiGrav do
+            local moved = 0
+            for _, p in pairs(workspace:GetDescendants()) do
+                if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
+                    if moved > 60 then break end -- Processa 60 peças por ciclo (Caos Puro)
+                    
+                    -- Aplica força para cima (Vector Force / Velocity)
+                    p.Velocity = Vector3.new(p.Velocity.X, 50, p.Velocity.Z) 
+                    p.RotVelocity = Vector3.new(5, 5, 5) -- Faz rodar levemente enquanto sobe
+                    moved = moved + 1
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end)
+
+-- 2. NOCLIP FANTASMA MORTAL
 local ghostMode = false
 addOption("NOCLIP FANTASMA MORTAL", function()
     ghostMode = not ghostMode
     local char = lp.Character
     local hrp = char:FindFirstChild("HumanoidRootPart")
-    
     if ghostMode then
-        -- Ativa o Giro de Morte
         local bV = Instance.new("BodyAngularVelocity", hrp)
         bV.Name = "GhostFling"
         bV.AngularVelocity = Vector3.new(0, 999999, 0)
         bV.MaxTorque = Vector3.new(0, math.huge, 0)
-        
-        -- Loop de Noclip (Atravessar tudo)
         task.spawn(function()
             while ghostMode do
-                for _, v in pairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
+                for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
                 RunService.Stepped:Wait()
             end
-            -- Restaura colisão ao desligar
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = true end
-            end
+            for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = true end end
         end)
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LUIZ MENU", Text = "FANTASMA ATIVADO!"})
     else
         if hrp:FindFirstChild("GhostFling") then hrp.GhostFling:Destroy() end
     end
 end)
 
--- 2. VÓRTICE SUPREMO (Liquidificador de Spawn)
+-- 3. VÓRTICE SUPREMO (SPAWN)
 _G.Vortex = false
 addOption("VÓRTICE SUPREMO (SPAWN)", function()
     _G.Vortex = not _G.Vortex
@@ -119,7 +132,6 @@ addOption("VÓRTICE SUPREMO (SPAWN)", function()
                     if c > 45 then break end
                     p.CFrame = CFrame.new(spawnPos + Vector3.new(math.cos(a)*35, 15, math.sin(a)*35))
                     p.Velocity = Vector3.new(0, 120, 0)
-                    p.RotVelocity = Vector3.new(100, 100, 100)
                     c = c + 1
                 end
             end
@@ -128,9 +140,9 @@ addOption("VÓRTICE SUPREMO (SPAWN)", function()
     end)
 end)
 
--- 3. TP LOOP ALL (Aniquilação Total)
+-- 4. TP LOOP ALL
 _G.TPLoop = false
-addOption("TP LOOP ALL (ATROPELAR)", function()
+addOption("TP LOOP ALL (ANIQUILAR)", function()
     _G.TPLoop = not _G.TPLoop
     task.spawn(function()
         while _G.TPLoop do
@@ -145,19 +157,17 @@ addOption("TP LOOP ALL (ATROPELAR)", function()
     end)
 end)
 
--- 4. BRING ALL (Puxar Todos)
+-- 5. BRING ALL
 addOption("BRING ALL (PUXAR TODOS)", function()
     local myPos = lp.Character.HumanoidRootPart.CFrame
     for _, v in pairs(Players:GetPlayers()) do
-        if v ~= lp and v.Character then
-            v.Character.HumanoidRootPart.CFrame = myPos
-        end
+        if v ~= lp and v.Character then v.Character.HumanoidRootPart.CFrame = myPos end
     end
 end)
 
--- 5. KILL AURA (Alcance 50 studs)
+-- 6. KILL AURA
 _G.Aura = false
-addOption("KILL AURA (ALCANCE MAX)", function()
+addOption("KILL AURA (ALCANCE 50)", function()
     _G.Aura = not _G.Aura
     while _G.Aura do
         for _, p in pairs(Players:GetPlayers()) do
@@ -170,19 +180,7 @@ addOption("KILL AURA (ALCANCE MAX)", function()
     end
 end)
 
--- 6. CHAT SPAM
-_G.Spam = false
-addOption("SPAM LUIZ MENU", function()
-    _G.Spam = not _G.Spam
-    task.spawn(function()
-        while _G.Spam do
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("LUIZ MENU V1 NO CONTROLE! 💀", "All")
-            task.wait(4)
-        end
-    end)
-end)
-
--- --- DRAG SYSTEM ---
+-- DRAG SYSTEM
 local function drag(f)
     local d, ds, sp
     f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true ds = i.Position sp = f.Position end end)
