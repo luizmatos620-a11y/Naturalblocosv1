@@ -1,65 +1,49 @@
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+-- LUIZ MENU V1 - REVISADO E FINALIZADO
+repeat task.wait() until game:IsLoaded()
+
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- Anti-AFK
-lp.Idled:Connect(function()
-    game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-end)
+-- Função segura para pegar o corpo
+local function getHRP()
+    local char = lp.Character or lp.CharacterAdded:Wait()
+    return char:WaitForChild("HumanoidRootPart", 5)
+end
 
+-- Interface
 local sg = Instance.new("ScreenGui", game.CoreGui)
-sg.Name = "LuizMenu_V1_Final_Apocalypse"
+sg.Name = "LuizMenu_V1_Final_Revised"
 sg.ResetOnSpawn = false
 
--- --- DESIGN HACKER VERMELHO ---
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 650, 0, 480) 
-main.Position = UDim2.new(0.5, -325, 0.5, -240)
-main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-main.BorderSizePixel = 2
+main.Size = UDim2.new(0, 550, 0, 480)
+main.Position = UDim2.new(0.5, -275, 0.5, -240)
+main.BackgroundColor3 = Color3.fromRGB(5, 0, 0)
+main.BorderSizePixel = 3
 main.BorderColor3 = Color3.fromRGB(255, 0, 0)
 Instance.new("UICorner", main)
 
-local closeBtn = Instance.new("TextButton", main)
-closeBtn.Size = UDim2.new(0, 40, 0, 40)
-closeBtn.Position = UDim2.new(1, -45, 0, 5)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
-closeBtn.TextSize = 30
-closeBtn.BackgroundTransparency = 1
-closeBtn.Font = Enum.Font.SourceSansBold
-
-local openIcon = Instance.new("ImageButton", sg)
-openIcon.Size = UDim2.new(0, 70, 0, 70)
-openIcon.Position = UDim2.new(0, 10, 0.4, 0)
-openIcon.Image = "rbxassetid://11293318182"
-openIcon.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
-openIcon.Visible = false
-Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
-
-closeBtn.MouseButton1Click:Connect(function() main.Visible = false openIcon.Visible = true end)
-openIcon.MouseButton1Click:Connect(function() main.Visible = true openIcon.Visible = false end)
-
-local sidebar = Instance.new("Frame", main)
-sidebar.Size = UDim2.new(0, 150, 1, 0)
-sidebar.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
-Instance.new("UICorner", sidebar)
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "LUIZ MENU V1 - GOD MODE"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
 
 local container = Instance.new("ScrollingFrame", main)
-container.Size = UDim2.new(1, -160, 1, -20)
-container.Position = UDim2.new(0, 160, 0, 10)
+container.Size = UDim2.new(1, -20, 1, -60)
+container.Position = UDim2.new(0, 10, 0, 50)
 container.BackgroundTransparency = 1
 container.ScrollBarThickness = 4
-Instance.new("UIListLayout", container).Padding = UDim.new(0, 10)
+Instance.new("UIListLayout", container).Padding = UDim.new(0, 8)
 
 local function addOption(txt, cb)
     local b = Instance.new("TextButton", container)
-    b.Size = UDim2.new(1, -15, 0, 40)
-    b.BackgroundColor3 = Color3.fromRGB(35, 0, 0)
+    b.Size = UDim2.new(1, -10, 0, 45)
+    b.BackgroundColor3 = Color3.fromRGB(25, 0, 0)
     b.Text = txt
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.SourceSansBold
@@ -68,71 +52,32 @@ local function addOption(txt, cb)
     b.MouseButton1Click:Connect(cb)
 end
 
--- --- FUNÇÕES DE DESTRUIÇÃO ---
+-- --- FUNÇÕES REVISADAS ---
 
--- 1. GRAVIDADE ZERO (O QUE VOCÊ PEDIU - FAZ TUDO SUBIR)
-_G.AntiGrav = false
-addOption("GRAVIDADE ZERO (MAPA TODO)", function()
-    _G.AntiGrav = not _G.AntiGrav
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LUIZ MENU", Text = _G.AntiGrav and "TUDO ESTÁ SUBINDO!" or "GRAVIDADE NORMAL"})
-    
+-- 1. ESCUDO DE ENTULHO (ORBITAL AO REDOR DE VOCÊ)
+_G.Shield = false
+addOption("ATIVAR ESCUDO DE ENTULHO", function()
+    _G.Shield = not _G.Shield
+    local angle = 0
     task.spawn(function()
-        while _G.AntiGrav do
-            local moved = 0
-            for _, p in pairs(workspace:GetDescendants()) do
-                if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
-                    if moved > 60 then break end -- Processa 60 peças por ciclo (Caos Puro)
-                    
-                    -- Aplica força para cima (Vector Force / Velocity)
-                    p.Velocity = Vector3.new(p.Velocity.X, 50, p.Velocity.Z) 
-                    p.RotVelocity = Vector3.new(5, 5, 5) -- Faz rodar levemente enquanto sobe
-                    moved = moved + 1
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-end)
-
--- 2. NOCLIP FANTASMA MORTAL
-local ghostMode = false
-addOption("NOCLIP FANTASMA MORTAL", function()
-    ghostMode = not ghostMode
-    local char = lp.Character
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if ghostMode then
-        local bV = Instance.new("BodyAngularVelocity", hrp)
-        bV.Name = "GhostFling"
-        bV.AngularVelocity = Vector3.new(0, 999999, 0)
-        bV.MaxTorque = Vector3.new(0, math.huge, 0)
-        task.spawn(function()
-            while ghostMode do
-                for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
-                RunService.Stepped:Wait()
-            end
-            for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = true end end
-        end)
-    else
-        if hrp:FindFirstChild("GhostFling") then hrp.GhostFling:Destroy() end
-    end
-end)
-
--- 3. VÓRTICE SUPREMO (SPAWN)
-_G.Vortex = false
-addOption("VÓRTICE SUPREMO (SPAWN)", function()
-    _G.Vortex = not _G.Vortex
-    local spawnPos = Vector3.new(-285, 180, 375)
-    local a = 0
-    task.spawn(function()
-        while _G.Vortex do
-            a = a + 0.8
-            local c = 0
-            for _, p in pairs(workspace:GetDescendants()) do
-                if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
-                    if c > 45 then break end
-                    p.CFrame = CFrame.new(spawnPos + Vector3.new(math.cos(a)*35, 15, math.sin(a)*35))
-                    p.Velocity = Vector3.new(0, 120, 0)
-                    c = c + 1
+        while _G.Shield do
+            angle = angle + 0.4
+            local hrp = getHRP()
+            if hrp then
+                local count = 0
+                for _, p in pairs(workspace:GetDescendants()) do
+                    if p:IsA("BasePart") and not p.Anchored and not p:IsDescendantOf(lp.Character) then
+                        if count > 30 then break end
+                        
+                        local x = math.cos(angle + (count * 0.6)) * 18
+                        local z = math.sin(angle + (count * 0.6)) * 18
+                        local targetPos = hrp.Position + Vector3.new(x, 2, z)
+                        
+                        p.CFrame = CFrame.new(targetPos)
+                        p.Velocity = (targetPos - p.Position) * 50
+                        p.RotVelocity = Vector3.new(40, 40, 40)
+                        count = count + 1
+                    end
                 end
             end
             task.wait(0.01)
@@ -140,54 +85,74 @@ addOption("VÓRTICE SUPREMO (SPAWN)", function()
     end)
 end)
 
--- 4. TP LOOP ALL
+-- 2. APOCALIPSE (EXPULSAR TUDO DO MAPA)
+addOption("APOCALIPSE (LIMPAR MAPA)", function()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(lp.Character) then
+            v.CFrame = CFrame.new(0, -10000, 0)
+        end
+    end
+end)
+
+-- 3. VOID ALL (LEVAR TODOS PRO ABISMO)
+addOption("VOID ALL (KILL ALL VÁCUO)", function()
+    local hrp = getHRP()
+    if hrp then
+        local oldPos = hrp.CFrame
+        hrp.CFrame = CFrame.new(0, -450, 0)
+        task.wait(0.3)
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                v.Character.HumanoidRootPart.CFrame = hrp.CFrame
+            end
+        end
+        task.wait(0.8)
+        hrp.CFrame = oldPos
+    end
+end)
+
+-- 4. TP LOOP (ATROPELAR PLAYERS)
 _G.TPLoop = false
-addOption("TP LOOP ALL (ANIQUILAR)", function()
+addOption("TP LOOP (ANIQUILAÇÃO)", function()
     _G.TPLoop = not _G.TPLoop
     task.spawn(function()
         while _G.TPLoop do
             for _, v in pairs(Players:GetPlayers()) do
                 if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    lp.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
-                    task.wait(0.1)
+                    local hrp = getHRP()
+                    if hrp then hrp.CFrame = v.Character.HumanoidRootPart.CFrame end
+                    task.wait(0.12)
                 end
             end
-            task.wait()
         end
     end)
 end)
 
--- 5. BRING ALL
-addOption("BRING ALL (PUXAR TODOS)", function()
-    local myPos = lp.Character.HumanoidRootPart.CFrame
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= lp and v.Character then v.Character.HumanoidRootPart.CFrame = myPos end
-    end
-end)
-
--- 6. KILL AURA
-_G.Aura = false
-addOption("KILL AURA (ALCANCE 50)", function()
-    _G.Aura = not _G.Aura
-    while _G.Aura do
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= lp and p.Character and (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude < 50 then
-                local tool = lp.Character:FindFirstChildOfClass("Tool")
-                if tool then tool:Activate() end
+-- 5. GRAVIDADE ZERO (SUBIDA RÁPIDA)
+_G.Grav = false
+addOption("GRAVIDADE ZERO (MAPA SUBIR)", function()
+    _G.Grav = not _G.Grav
+    task.spawn(function()
+        while _G.Grav do
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(lp.Character) then
+                    v.Velocity = Vector3.new(0, 100, 0)
+                end
             end
+            task.wait(0.3)
         end
-        task.wait(0.1)
-    end
+    end)
 end)
 
--- DRAG SYSTEM
-local function drag(f)
-    local d, ds, sp
-    f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true ds = i.Position sp = f.Position end end)
-    UserInputService.InputChanged:Connect(function(i) if d then
-        local delta = i.Position - ds
-        f.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
-    end end)
-    UserInputService.InputEnded:Connect(function() d = false end)
-end
-drag(main) drag(openIcon)
+-- Botão de Fechar (X)
+local close = Instance.new("TextButton", main)
+close.Size = UDim2.new(0, 35, 0, 35)
+close.Position = UDim2.new(1, -40, 0, 5)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.MouseButton1Click:Connect(function() sg:Destroy() end)
+
+-- Arrastar
+main.Active = true
+main.Draggable = true
