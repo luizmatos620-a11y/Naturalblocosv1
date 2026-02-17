@@ -1,293 +1,212 @@
--- LUIZPHONE V2 - IPHONE 15 PRO MAX COM TECLADO NUMÉRICO (FIXED)
+-- LUIZPHONE V3 PREMIUM - IPHONE 15 PRO MAX EDITION
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local lp = Players.LocalPlayer
+local pgui = lp:WaitForChild("PlayerGui")
 
--- Destrói qualquer GUI anterior do LuizPhone para evitar conflitos
-if PlayerGui:FindFirstChild("LuizPhone") then
-    PlayerGui.LuizPhone:Destroy()
-end
+-- Limpeza de versões antigas
+if pgui:FindFirstChild("LuizPhone") then pgui.LuizPhone:Destroy() end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LuizPhone"
-ScreenGui.Parent = PlayerGui
+local LuizPhone = Instance.new("ScreenGui")
+LuizPhone.Name = "LuizPhone"
+LuizPhone.Parent = pgui
+LuizPhone.ResetOnSpawn = false
 
--- --- FRAME PRINCIPAL DO CELULAR ---
-local PhoneFrame = Instance.new("Frame")
-PhoneFrame.Name = "PhoneFrame"
-PhoneFrame.Parent = ScreenGui
-PhoneFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-PhoneFrame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centralizado
-PhoneFrame.Size = UDim2.new(0, 280, 0, 580) -- Tamanho mais realista
-PhoneFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Borda preta
-PhoneFrame.ClipsDescendants = true -- Corta o que estiver fora da borda
-PhoneFrame.Draggable = true -- Pode arrastar o celular
-PhoneFrame.ZIndex = 100 -- Fica por cima de tudo
+-- --- CHASSIS DO IPHONE ---
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = LuizPhone
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 260, 0, 540)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 22) -- Titânio Negro
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
 
-local PhoneCorner = Instance.new("UICorner")
-PhoneCorner.CornerRadius = UDim.new(0, 45) -- Bordas arredondadas do iPhone
-PhoneCorner.Parent = PhoneFrame
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 45)
+MainCorner.Parent = MainFrame
 
-local ScreenHolder = Instance.new("Frame") -- Onde o wallpaper e apps ficam
-ScreenHolder.Name = "ScreenHolder"
-ScreenHolder.Parent = PhoneFrame
-ScreenHolder.Position = UDim2.new(0.02, 0, 0.02, 0)
-ScreenHolder.Size = UDim2.new(0.96, 0, 0.96, 0)
-ScreenHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ScreenHolder.ClipsDescendants = true
+-- Brilho da Borda (Efeito Premium)
+local Stroke = Instance.new("UIStroke")
+Stroke.Thickness = 3
+Stroke.Color = Color3.fromRGB(60, 60, 65)
+Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+Stroke.Parent = MainFrame
 
-local ScreenHolderCorner = Instance.new("UICorner")
-ScreenHolderCorner.CornerRadius = UDim.new(0, 38)
-ScreenHolderCorner.Parent = ScreenHolder
+-- --- TELA INTERNA ---
+local Screen = Instance.new("ImageLabel")
+Screen.Name = "Screen"
+Screen.Parent = MainFrame
+Screen.Position = UDim2.new(0.03, 0, 0.015, 0)
+Screen.Size = UDim2.new(0.94, 0, 0.97, 0)
+Screen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Screen.Image = "rbxassetid://13192011036" -- Wallpaper iOS 17
+Screen.ScaleType = Enum.ScaleType.Fill
+Screen.ClipsDescendants = true
 
-local Wallpaper = Instance.new("ImageLabel")
-Wallpaper.Name = "Wallpaper"
-Wallpaper.Parent = ScreenHolder
-Wallpaper.Size = UDim2.new(1, 0, 1, 0)
-Wallpaper.Image = "rbxassetid://13192011036" -- ID de Wallpaper iOS
-Wallpaper.ScaleType = Enum.ScaleType.Fill
-Wallpaper.ZIndex = 1
+local ScreenCorner = Instance.new("UICorner")
+ScreenCorner.CornerRadius = UDim.new(0, 38)
+ScreenCorner.Parent = Screen
 
--- --- ILHA DINÂMICA ---
-local DynamicIsland = Instance.new("Frame")
-DynamicIsland.Name = "DynamicIsland"
-DynamicIsland.Parent = Wallpaper
-DynamicIsland.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-DynamicIsland.Size = UDim2.new(0, 100, 0, 25)
-DynamicIsland.Position = UDim2.new(0.5, -50, 0.02, 0)
-DynamicIsland.ZIndex = 5
+-- --- ILHA DINÂMICA (DYNAMIC ISLAND) ---
+local Island = Instance.new("Frame")
+Island.Name = "DynamicIsland"
+Island.Parent = Screen
+Island.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Island.Size = UDim2.new(0, 85, 0, 22)
+Island.Position = UDim2.new(0.5, -42, 0.02, 0)
+Island.ZIndex = 10
+
 local IslandCorner = Instance.new("UICorner")
 IslandCorner.CornerRadius = UDim.new(1, 0)
-IslandCorner.Parent = DynamicIsland
+IslandCorner.Parent = Island
 
--- --- TELA DE BLOQUEIO ---
+-- --- TELA DE BLOQUEIO (KEY SYSTEM) ---
 local LockScreen = Instance.new("Frame")
 LockScreen.Name = "LockScreen"
-LockScreen.Parent = ScreenHolder
+LockScreen.Parent = Screen
 LockScreen.Size = UDim2.new(1, 0, 1, 0)
 LockScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-LockScreen.BackgroundTransparency = 0.5 -- Efeito de blur leve no wallpaper
-LockScreen.ZIndex = 2
+LockScreen.BackgroundTransparency = 0.3
+LockScreen.ZIndex = 5
 
-local ClockLabel = Instance.new("TextLabel")
-ClockLabel.Name = "Clock"
-ClockLabel.Parent = LockScreen
-ClockLabel.Text = os.date("%H:%M")
-ClockLabel.Size = UDim2.new(1, 0, 0.15, 0)
-ClockLabel.Position = UDim2.new(0, 0, 0.15, 0)
-ClockLabel.BackgroundTransparency = 1
-ClockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClockLabel.Font = Enum.Font.GothamBold
-ClockLabel.TextSize = 65
-ClockLabel.ZIndex = 3
+-- Relógio e Data
+local TimeLabel = Instance.new("TextLabel")
+TimeLabel.Parent = LockScreen
+TimeLabel.Text = os.date("%H:%M")
+TimeLabel.Size = UDim2.new(1, 0, 0.2, 0)
+TimeLabel.Position = UDim2.new(0, 0, 0.1, 0)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimeLabel.Font = Enum.Font.GothamBold
+TimeLabel.TextSize = 55
 
-local DateLabel = Instance.new("TextLabel")
-DateLabel.Name = "Date"
-DateLabel.Parent = LockScreen
-DateLabel.Text = os.date("%a, %d %b")
-DateLabel.Size = UDim2.new(1, 0, 0.05, 0)
-DateLabel.Position = UDim2.new(0, 0, 0.3, 0)
-DateLabel.BackgroundTransparency = 1
-DateLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-DateLabel.Font = Enum.Font.GothamMedium
-DateLabel.TextSize = 20
-DateLabel.ZIndex = 3
+-- Teclado Numérico do iPhone
+local Keypad = Instance.new("Frame")
+Keypad.Parent = LockScreen
+Keypad.Size = UDim2.new(0.9, 0, 0.5, 0)
+Keypad.Position = UDim2.new(0.05, 0, 0.45, 0)
+Keypad.BackgroundTransparency = 1
 
-local PasscodeDisplay = Instance.new("TextBox")
-PasscodeDisplay.Name = "PasscodeDisplay"
-PasscodeDisplay.Parent = LockScreen
-PasscodeDisplay.Size = UDim2.new(0.8, 0, 0.06, 0)
-PasscodeDisplay.Position = UDim2.new(0.1, 0, 0.4, 0)
-PasscodeDisplay.Text = ""
-PasscodeDisplay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-PasscodeDisplay.BackgroundTransparency = 0.8
-PasscodeDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
-PasscodeDisplay.TextSize = 24
-PasscodeDisplay.Font = Enum.Font.SourceSansBold
-PasscodeDisplay.TextXAlignment = Enum.TextXAlignment.Center
-PasscodeDisplay.ClearTextOnFocus = false
-PasscodeDisplay.ZIndex = 3
-PasscodeDisplay.Visible = false -- Fica invisível até ser clicado
+local Grid = Instance.new("UIGridLayout")
+Grid.Parent = Keypad
+Grid.CellPadding = UDim2.new(0, 10, 0, 10)
+Grid.CellSize = UDim2.new(0, 60, 0, 60)
+Grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- --- TECLADO NUMÉRICO ---
-local KeyboardFrame = Instance.new("Frame")
-KeyboardFrame.Name = "Keyboard"
-KeyboardFrame.Parent = LockScreen
-KeyboardFrame.Size = UDim2.new(0.9, 0, 0.45, 0)
-KeyboardFrame.Position = UDim2.new(0.05, 0, 0.5, 0)
-KeyboardFrame.BackgroundTransparency = 1
-KeyboardFrame.ZIndex = 3
+local currentKey = ""
+local pass = "Luizmenu2026"
 
-local KeyboardLayout = Instance.new("UIGridLayout")
-KeyboardLayout.Parent = KeyboardFrame
-KeyboardLayout.CellPadding = UDim2.new(0, 10, 0, 10)
-KeyboardLayout.CellSize = UDim2.new(0.3, 0, 0.25, 0)
-KeyboardLayout.FillDirection = Enum.FillDirection.Horizontal
-KeyboardLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-KeyboardLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-
-local currentPasscode = ""
-local correctPasscode = "Luizmenu2026"
-
-local function createKeyButton(text, isDelete)
-    local Button = Instance.new("TextButton")
-    Button.Parent = KeyboardFrame
-    Button.Size = UDim2.new(0.3, 0, 0.25, 0)
-    Button.Text = text
-    Button.Font = Enum.Font.GothamMedium
-    Button.TextSize = 30
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.BackgroundTransparency = 0.6
-    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Cor dos botões do teclado
+local function createKey(num)
+    local btn = Instance.new("TextButton")
+    btn.Parent = Keypad
+    btn.Text = num
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 24
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.8
     
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(1, 0) -- Botões redondos
-    ButtonCorner.Parent = Button
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(1, 0)
+    c.Parent = btn
     
-    Button.MouseButton1Click:Connect(function()
-        if isDelete then
-            currentPasscode = currentPasscode:sub(1, #currentPasscode - 1)
-        else
-            currentPasscode = currentPasscode .. text
-        end
-        PasscodeDisplay.Text = string.rep("*", #currentPasscode) -- Mostra asteriscos
-        
-        if #currentPasscode == #correctPasscode then
-            if currentPasscode == correctPasscode then
-                LockScreen:TweenPosition(UDim2.new(0, 0, -1, 0), "Out", "Quad", 0.5, true)
-                task.wait(0.5)
-                LockScreen.Visible = false
-                game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LuizPhone", Text = "Bem-vindo, Luiz!", Duration = 3})
-            else
-                PasscodeDisplay.Text = "INCORRETO"
-                currentPasscode = ""
-                task.wait(1)
-                PasscodeDisplay.Text = ""
-            end
+    btn.MouseButton1Click:Connect(function()
+        currentKey = currentKey .. num
+        if currentKey == pass then
+            LockScreen:TweenPosition(UDim2.new(0, 0, -1, 0), "Out", "Quart", 0.5)
+            task.wait(0.6)
+            LockScreen.Visible = false
+        elseif #currentKey >= #pass then
+            currentKey = ""
+            TimeLabel.Text = "ERRO"
+            task.wait(1)
+            TimeLabel.Text = os.date("%H:%M")
         end
     end)
 end
 
--- Cria os botões do teclado
-for i = 1, 9 do createKeyButton(tostring(i), false) end
-createKeyButton("", false) -- Espaço vazio
-createKeyButton("0", false)
-createKeyButton("⌫", true) -- Botão de apagar (BackSpace)
+-- Gerar números 1-9, 0
+for i = 1, 9 do createKey(tostring(i)) end
+createKey("0")
 
--- --- HOME SCREEN (APLICATIVOS) ---
+-- --- TELA INICIAL (APPS) ---
 local HomeScreen = Instance.new("ScrollingFrame")
 HomeScreen.Name = "HomeScreen"
-HomeScreen.Parent = ScreenHolder
+HomeScreen.Parent = Screen
 HomeScreen.Size = UDim2.new(1, 0, 1, 0)
 HomeScreen.BackgroundTransparency = 1
-HomeScreen.ZIndex = 1 -- Fica abaixo do LockScreen
-HomeScreen.Visible = false -- Começa invisível
+HomeScreen.ScrollBarTransparency = 1
+HomeScreen.Visible = true
 
-local AppLayout = Instance.new("UIGridLayout")
-AppLayout.Parent = HomeScreen
-AppLayout.CellPadding = UDim2.new(0, 15, 0, 20)
-AppLayout.CellSize = UDim2.new(0, 50, 0, 50)
-AppLayout.StartCorner = Enum.StartCorner.TopLeft
-AppLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-AppLayout.Position = UDim2.new(0, 0, 0.1, 0)
+local AppGrid = Instance.new("UIGridLayout")
+AppGrid.Parent = HomeScreen
+AppGrid.CellPadding = UDim2.new(0, 20, 0, 25)
+AppGrid.CellSize = UDim2.new(0, 50, 0, 50)
+AppGrid.Position = UDim2.new(0, 0, 0.1, 0)
+AppGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- Função para criar um ícone de App
-local function CreateApp(name, iconID, callback)
-    local AppButton = Instance.new("ImageButton")
-    AppButton.Name = name
-    AppButton.Parent = HomeScreen
-    AppButton.Image = "rbxassetid://" .. iconID
-    AppButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    AppButton.BackgroundTransparency = 0.2 -- Efeito de vidro no ícone
+local function AddApp(name, icon, code)
+    local app = Instance.new("ImageButton")
+    app.Parent = HomeScreen
+    app.Image = "rbxassetid://" .. icon
+    app.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     
-    local AppCorner = Instance.new("UICorner")
-    AppCorner.CornerRadius = UDim.new(0, 12)
-    AppCorner.Parent = AppButton
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 12)
+    c.Parent = app
     
-    local AppLabel = Instance.new("TextLabel")
-    AppLabel.Parent = AppButton
-    AppLabel.Text = name
-    AppLabel.Size = UDim2.new(1, 0, 0.3, 0)
-    AppLabel.Position = UDim2.new(0, 0, 1, 2)
-    AppLabel.BackgroundTransparency = 1
-    AppLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    AppLabel.TextSize = 10
-    AppLabel.Font = Enum.Font.Gotham
+    local label = Instance.new("TextLabel")
+    label.Parent = app
+    label.Text = name
+    label.Position = UDim2.new(0, 0, 1, 5)
+    label.Size = UDim2.new(1, 0, 0, 15)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 10
     
-    AppButton.MouseButton1Click:Connect(callback)
-    return AppButton
+    app.MouseButton1Click:Connect(code)
 end
 
--- --- SEUS APLICATIVOS (COM ÍCONES NOVOS) ---
--- (Os IDs de ícones abaixo são exemplos, você pode encontrar outros no Roblox Studio!)
+-- SEUS APPS (Configure as funções aqui)
+AddApp("Natural", "13110300684", function() print("App Natural Disaster") end)
+AddApp("Emotes", "13110298377", function() print("App Emotes") end)
+AddApp("Fling", "13110300684", function() print("App Fling") end)
 
-CreateApp("Destroços", "13110300684", function() -- Ícone de casa destruindo
-    print("Iniciando App Natural Disaster...")
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LuizPhone", Text = "App Destroços Aberto!"})
-end)
-
-CreateApp("Animações", "13110300684", function() -- Ícone de boneco dançando
-     print("Abrindo Emotes...")
-end)
-
-CreateApp("Fling", "13110300684", function() -- Ícone de explosão/foguete
-    _G.GhostFling = not _G.GhostFling
-    local status = _G.GhostFling and "Ligado" or "Desligado"
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LuizPhone", Text = "Fling Fantasma: " .. status})
-end)
-
-CreateApp("Tycon", "13110300684", function() -- Ícone de dinheiro
-    print("Abrindo Tycon God...")
-end)
-
--- --- BOTÃO HOME (PARA FECHAR/ABRIR O CELULAR) ---
+-- --- BARRA HOME (MINIMIZAR) ---
 local HomeBar = Instance.new("Frame")
-HomeBar.Name = "HomeBar"
-HomeBar.Parent = ScreenHolder
+HomeBar.Parent = Screen
 HomeBar.Size = UDim2.new(0.4, 0, 0, 5)
-HomeBar.Position = UDim2.new(0.3, 0, 0.95, 0)
+HomeBar.Position = UDim2.new(0.3, 0, 0.96, 0)
 HomeBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-HomeBar.BackgroundTransparency = 0.5 -- Estilo iOS
-local HomeBarCorner = Instance.new("UICorner")
-HomeBarCorner.CornerRadius = UDim.new(1, 0)
-HomeBarCorner.Parent = HomeBar
+HomeBar.ZIndex = 15
+Instance.new("UICorner", HomeBar).CornerRadius = UDim.new(1,0)
 
-local CellVisibility = true -- Variável para controlar se o celular está visível ou não
+-- Botão Flutuante para reabrir
+local Reopen = Instance.new("TextButton")
+Reopen.Parent = LuizPhone
+Reopen.Size = UDim2.new(0, 50, 0, 50)
+Reopen.Position = UDim2.new(0, 10, 0.5, 0)
+Reopen.Text = "🍎"
+Reopen.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Reopen.TextColor3 = Color3.fromRGB(255, 255, 255)
+Reopen.Visible = false
+Instance.new("UICorner", Reopen).CornerRadius = UDim.new(1,0)
 
--- Botão para esconder/mostrar o celular
-local HideButton = Instance.new("TextButton")
-HideButton.Parent = ScreenGui
-HideButton.Size = UDim2.new(0, 50, 0, 50)
-HideButton.Position = UDim2.new(1, -60, 0, 10) -- Canto superior direito da tela
-HideButton.Text = "📱" -- Ícone de celular
-HideButton.Font = Enum.Font.SourceSansBold
-HideButton.TextSize = 30
-HideButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-HideButton.BackgroundTransparency = 0.5
-local HideButtonCorner = Instance.new("UICorner")
-HideButtonCorner.CornerRadius = UDim.new(1,0)
-HideButtonCorner.Parent = HideButton
-
-HideButton.MouseButton1Click:Connect(function()
-    CellVisibility = not CellVisibility
-    PhoneFrame:TweenSizeAndPosition(
-        CellVisibility and UDim2.new(0, 280, 0, 580) or UDim2.new(0, 0, 0, 0), -- Se visível, tamanho normal; se não, tamanho 0
-        CellVisibility and UDim2.new(0.5, 0, 0.5, 0) or UDim2.new(1, 0, 0, 0), -- Posição de origem para esconder
-        "Out", "Quad", 0.5, true -- Animação
-    )
-    HideButton.Text = CellVisibility and "📱" or "📲" -- Muda o ícone
+Reopen.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    Reopen.Visible = false
 end)
 
--- Inicia mostrando a tela de bloqueio
-LockScreen.Visible = true
-HomeScreen.Visible = false -- Esconde a Home Screen no início
-PasscodeDisplay.Visible = true -- Garante que o display da senha esteja visível
-
--- Atualiza a hora e data a cada minuto
-task.spawn(function()
-    while true do
-        ClockLabel.Text = os.date("%H:%M")
-        DateLabel.Text = os.date("%a, %d %b")
-        task.wait(60)
-    end
+-- Fechar ao clicar na HomeBar
+local closeTrigger = Instance.new("TextButton")
+closeTrigger.Parent = HomeBar
+closeTrigger.Size = UDim2.new(1, 0, 1, 0)
+closeTrigger.BackgroundTransparency = 1
+closeTrigger.Text = ""
+closeTrigger.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    Reopen.Visible = true
 end)
