@@ -1,170 +1,153 @@
--- LUIZ MENU V1 - SUPREMACIA TOTAL (SPIDER EDITION)
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- LUIZPHONE V1 - O IPHONE DO EXPLOIT
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Screen = Instance.new("ImageLabel") -- Papel de parede
 
-local Window = Rayfield:CreateWindow({
-   Name = "LUIZ MENU V1 👑",
-   LoadingTitle = "Carregando Luiz Menu...",
-   LoadingSubtitle = "por Luiz",
-   ConfigurationSaving = { Enabled = false },
-   KeySystem = true,
-   KeySettings = {
-      Title = "Sistema de Chave",
-      Subtitle = "Digite a senha do Luiz",
-      Note = "Luiz menu ⚡", -- Nota personalizada conforme solicitado
-      FileName = "LuizKey",
-      SaveKey = true,
-      GrabKeyFromSite = false,
-      Key = {"Luizmenu2026"} 
-   }
-})
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "LuizPhone"
 
-local lp = game:GetService("Players").LocalPlayer
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
+-- --- ESTRUTURA DO CELULAR ---
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.75, 0, 0.2, 0) -- Posição lateral
+MainFrame.Size = UDim2.new(0, 250, 0, 500)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Você pode arrastar o celular pela tela
 
--- --- ABA 1: FÍSICA & MOVIMENTO (SPIDER & FLY) 🕷️ ---
-local TabMov = Window:CreateTab("Movimento 🕷️", 4483362458)
+UICorner.CornerRadius = UDim.new(0, 40)
+UICorner.Parent = MainFrame
 
-TabMov:CreateToggle({
-   Name = "Modo Homem-Aranha (Wall Walk) 🕸️",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.SpiderMode = Value
-      task.spawn(function()
-         while _G.SpiderMode do
-            local char = lp.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-               -- Raio para detetar paredes à frente
-               local raycastParams = RaycastParams.new()
-               raycastParams.FilterDescendantsInstances = {char}
-               local ray = workspace:Raycast(char.HumanoidRootPart.Position, char.HumanoidRootPart.CFrame.LookVector * 3, raycastParams)
-               
-               if ray then
-                  -- Alinha o boneco com a parede e anula a gravidade para subir
-                  char.HumanoidRootPart.Velocity = Vector3.new(char.HumanoidRootPart.Velocity.X, 20, char.HumanoidRootPart.Velocity.Z)
-               end
-            end
-            task.wait()
-         end
-      end)
-   end,
-})
+-- Wallpaper (Estilo iOS 17)
+Screen.Name = "Screen"
+Screen.Parent = MainFrame
+Screen.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Screen.Position = UDim2.new(0.03, 0, 0.02, 0)
+Screen.Size = UDim2.new(0.94, 0, 0.96, 0)
+Screen.Image = "rbxassetid://13192011036" -- ID de um wallpaper de iPhone
+Screen.ScaleType = Enum.ScaleType.Crop
 
-TabMov:CreateToggle({
-   Name = "Noclip (Atravessar Tudo) 👻",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.Noclip = Value
-      RunService.Stepped:Connect(function()
-         if _G.Noclip and lp.Character then
-            for _, v in pairs(lp.Character:GetDescendants()) do
-               if v:IsA("BasePart") then v.CanCollide = false end
-            end
-         end
-      end)
-   end,
-})
+local ScreenCorner = Instance.new("UICorner")
+ScreenCorner.CornerRadius = UDim.new(0, 35)
+ScreenCorner.Parent = Screen
 
-TabMov:CreateButton({
-   Name = "Ativar Balão 🎈",
-   Callback = function()
-      local bf = Instance.new("BodyForce", lp.Character.HumanoidRootPart)
-      bf.Force = Vector3.new(0, workspace.Gravity * lp.Character.HumanoidRootPart:GetMass() * 0.9, 0)
-   end,
-})
+-- --- TELA DE BLOQUEIO (KEY SYSTEM) ---
+local LockScreen = Instance.new("Frame")
+LockScreen.Name = "LockScreen"
+LockScreen.Parent = Screen
+LockScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LockScreen.BackgroundTransparency = 0.4
+LockScreen.Size = UDim2.new(1, 0, 1, 0)
+LockScreen.ZIndex = 5
 
--- --- ABA 2: DEFESA & PVP 🛡️ ---
-local TabDefesa = Window:CreateTab("Defesa & PvP 🛡️", 4483362458)
+local TimeLabel = Instance.new("TextLabel")
+TimeLabel.Parent = LockScreen
+TimeLabel.Text = os.date("%H:%M")
+TimeLabel.Size = UDim2.new(1, 0, 0.2, 0)
+TimeLabel.Position = UDim2.new(0, 0, 0.1, 0)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimeLabel.Font = Enum.Font.SourceSansLight
+TimeLabel.TextSize = 60
 
-TabDefesa:CreateToggle({
-   Name = "Anti-Fling (Proteção) 🛡️",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.AntiFling = Value
-      task.spawn(function()
-         while _G.AntiFling do
-            if lp.Character then
-               -- Anula velocidades extremas aplicadas por outros players
-               local hrp = lp.Character:FindFirstChild("HumanoidRootPart")
-               if hrp and hrp.Velocity.Magnitude > 100 then
-                  hrp.Velocity = Vector3.new(0, 0, 0)
-                  hrp.RotVelocity = Vector3.new(0, 0, 0)
-               end
-            end
-            task.wait()
-         end
-      end)
-   end,
-})
+local PassCodeBox = Instance.new("TextBox")
+PassCodeBox.Parent = LockScreen
+PassCodeBox.Size = UDim2.new(0.8, 0, 0.08, 0)
+PassCodeBox.Position = UDim2.new(0.1, 0, 0.5, 0)
+PassCodeBox.PlaceholderText = "Digite a Senha"
+PassCodeBox.Text = ""
+PassCodeBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+PassCodeBox.BackgroundTransparency = 0.8
+PassCodeBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-TabDefesa:CreateButton({
-   Name = "Hitbox Gigante (Caixa Box) 📦",
-   Callback = function()
-      for _, p in pairs(game.Players:GetPlayers()) do
-         if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = p.Character.HumanoidRootPart
-            hrp.Size = Vector3.new(15, 15, 15)
-            hrp.Transparency = 0.7
-            hrp.CanCollide = false
-         end
-      end
-   end,
-})
+local UnlockBtn = Instance.new("TextButton")
+UnlockBtn.Parent = LockScreen
+UnlockBtn.Size = UDim2.new(0.5, 0, 0.08, 0)
+UnlockBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
+UnlockBtn.Text = "Desbloquear"
+UnlockBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 
--- --- ABA 3: VISUAL (ESP) 👁️ ---
-local TabVisual = Window:CreateTab("Visual 👁️", 4483362458)
+UnlockBtn.MouseButton1Click:Connect(function()
+    if PassCodeBox.Text == "Luizmenu2026" then
+        LockScreen:TweenPosition(UDim2.new(0, 0, -1, 0), "Out", "Quart", 0.5)
+        wait(0.5)
+        LockScreen.Visible = false
+    else
+        PassCodeBox.Text = ""
+        PassCodeBox.PlaceholderText = "SENHA INCORRETA!"
+        wait(1)
+        PassCodeBox.PlaceholderText = "Digite a Senha"
+    end
+end)
 
-TabVisual:CreateToggle({
-   Name = "ESP Players (Ver Através) 👥",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.ESP = Value
-      while _G.ESP do
-         for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= lp and p.Character and not p.Character:FindFirstChild("Highlight") then
-               local hl = Instance.new("Highlight", p.Character)
-               hl.FillColor = Color3.fromRGB(0, 255, 255)
-            end
-         end
-         task.wait(1)
-      end
-      if not Value then
-         for _, p in pairs(game.Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("Highlight") then
-               p.Character.Highlight:Destroy()
-            end
-         end
-      end
-   end,
-})
+-- --- TELA INICIAL (APPS) ---
+local HomeScreen = Instance.new("ScrollingFrame")
+HomeScreen.Parent = Screen
+HomeScreen.Size = UDim2.new(1, 0, 0.9, 0)
+HomeScreen.Position = UDim2.new(0, 0, 0.05, 0)
+HomeScreen.BackgroundTransparency = 1
+HomeScreen.ScrollBarTransparency = 1
 
--- --- ABA 4: AURA & TORNADO (O RESTO DO MENU) 🌀 ---
-local TabAura = Window:CreateTab("Aura & Fling 🌀", 4483362458)
+local Layout = Instance.new("UIGridLayout")
+Layout.Parent = HomeScreen
+Layout.CellPadding = UDim2.new(0, 15, 0, 20)
+Layout.CellSize = UDim2.new(0, 50, 0, 50)
+Layout.StartCorner = Enum.StartCorner.TopLeft
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-TabAura:CreateToggle({
-   Name = "Fling Supremacia 🌪️",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.Fling = Value
-      if Value then
-         task.spawn(function()
-            local hrp = lp.Character.HumanoidRootPart
-            local gyro = Instance.new("BodyGyro", hrp)
-            gyro.MaxTorque = Vector3.new(9e9, 0, 9e9)
-            while _G.Fling do
-               hrp.RotVelocity = Vector3.new(0, 15000, 0)
-               hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-               for _, p in pairs(game.Players:GetPlayers()) do
-                  if p ~= lp and p.Character and (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude < 10 then
-                     p.Character.HumanoidRootPart.Velocity = Vector3.new(70000, 70000, 70000)
-                  end
-               end
-               RunService.Heartbeat:Wait()
-            end
-            gyro:Destroy()
-         end)
-      end
-   end,
-})
+-- Função para Criar um "App"
+local function CreateApp(name, iconID, callback)
+    local App = Instance.new("ImageButton")
+    App.Name = name
+    App.Parent = HomeScreen
+    App.Image = "rbxassetid://" .. iconID
+    App.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    
+    local AppCorner = Instance.new("UICorner")
+    AppCorner.CornerRadius = UDim.new(0, 12)
+    AppCorner.Parent = App
+    
+    local AppLabel = Instance.new("TextLabel")
+    AppLabel.Parent = App
+    AppLabel.Text = name
+    AppLabel.Size = UDim2.new(1, 0, 0.3, 0)
+    AppLabel.Position = UDim2.new(0, 0, 1, 2)
+    AppLabel.BackgroundTransparency = 1
+    AppLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AppLabel.TextSize = 10
+    
+    App.MouseButton1Click:Connect(callback)
+end
 
-Rayfield:Notify({Title = "ACESSO LIBERADO", Content = "Luiz menu ⚡ ativo!", Duration = 5})
+-- --- MEUS APPS (FUNÇÕES) ---
+
+-- App de Desastres Naturais
+CreateApp("Natural", "13110298377", function()
+    -- Aqui você cola o código do seu menu de desastres
+    print("Iniciando App Natural Disaster...")
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "LuizPhone", Text = "App Natural Disaster Aberto!"})
+end)
+
+-- App de Emotes
+CreateApp("Emotes", "13110298377", function()
+     print("Abrindo Emotes...")
+end)
+
+-- App de Fling (Aba Bypass)
+CreateApp("Fling", "13110298377", function()
+    _G.GhostFling = not _G.GhostFling
+    local status = _G.GhostFling and "Ligado" or "Desligado"
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "iPhone Fling", Text = "Fling Fantasma: " .. status})
+end)
+
+-- Ilha Dinâmica (Dynamic Island)
+local Island = Instance.new("Frame")
+Island.Name = "DynamicIsland"
+Island.Parent = Screen
+Island.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Island.Size = UDim2.new(0, 80, 0, 20)
+Island.Position = UDim2.new(0.5, -40, 0.03, 0)
+local IslandCorner = Instance.new("UICorner")
+IslandCorner.CornerRadius = UDim.new(1, 0)
+IslandCorner.Parent = Island
