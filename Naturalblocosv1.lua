@@ -1,69 +1,70 @@
--- Script Luiz Aura - Fly Horizontal (Analógico)
+-- LUIZ AURA MENU VIP V2 (Fly Estabilizado)
 local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
+local VIPFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local FlyBtn = Instance.new("TextButton")
+local FlyVIPBtn = Instance.new("TextButton")
 
 ScreenGui.Parent = game.CoreGui
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
-MainFrame.Size = UDim2.new(0, 200, 0, 100)
-MainFrame.Active = true
-MainFrame.Draggable = true 
+VIPFrame.Parent = ScreenGui
+VIPFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Fundo VIP Preto
+VIPFrame.BorderSizePixel = 2
+VIPFrame.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Borda Dourada
+VIPFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
+VIPFrame.Size = UDim2.new(0, 200, 0, 120)
+VIPFrame.Active = true
+VIPFrame.Draggable = true 
 
-Title.Parent = MainFrame
-Title.Text = "LUIZ AURA - HORIZONTAL"
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.TextColor3 = Color3.fromRGB(0, 255, 255) -- Ciano Aura
-Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.Parent = VIPFrame
+Title.Text = "LUIZ AURA VIP"
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
-local flying = false
-local speed = 60 
+-- Lógica do FLY VIP (O que você pediu)
+local voador = false
+local velo = 70 -- Velocidade VIP
+FlyVIPBtn.Parent = VIPFrame
+FlyVIPBtn.Text = "FLY VIP: OFF"
+FlyVIPBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
+FlyVIPBtn.Size = UDim2.new(0.8, 0, 0.4, 0)
+FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+FlyVIPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-FlyBtn.Parent = MainFrame
-FlyBtn.Text = "Ativar Voo Plano"
-FlyBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
-FlyBtn.Size = UDim2.new(0.8, 0, 0.4, 0)
-
-FlyBtn.MouseButton1Click:Connect(function()
-    flying = not flying
-    local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
+FlyVIPBtn.MouseButton1Click:Connect(function()
+    voador = not voador
+    local char = game.Players.LocalPlayer.Character
     local hrp = char:WaitForChild("HumanoidRootPart")
     local hum = char:WaitForChild("Humanoid")
     
-    if flying then
-        FlyBtn.Text = "VOO PLANO (ON)"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+    if voador then
+        FlyVIPBtn.Text = "FLY VIP: ATIVO"
+        FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(218, 165, 32) -- Cor Ouro
         
         local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "AuraHorizontal"
+        bv.Name = "AuraVIP_Fly"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         
         local bg = Instance.new("BodyGyro", hrp)
-        bg.Name = "AuraGyro"
+        bg.Name = "AuraVIP_Gyro"
         bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        bg.P = 10000 -- Mais força para não balançar
         
         task.spawn(function()
-            while flying do
-                -- A mágica está aqui: Vector3.new(X, 0, Z) trava a altura no zero
+            while voador do
+                -- Movimento Horizontal Puro (Anti-Bug de Solo)
                 if hum.MoveDirection.Magnitude > 0 then
-                    local moveDir = hum.MoveDirection
-                    bv.Velocity = Vector3.new(moveDir.X * speed, 0, moveDir.Z * speed)
+                    local direcao = hum.MoveDirection
+                    bv.Velocity = Vector3.new(direcao.X * velo, 0, direcao.Z * velo)
+                    bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(direcao.X, 0, direcao.Z))
                 else
                     bv.Velocity = Vector3.new(0, 0, 0)
                 end
-                
-                -- Mantém o boneco olhando pra frente, sem inclinar pra baixo
-                if hum.MoveDirection.Magnitude > 0 then
-                    bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(moveDir.X, 0, moveDir.Z))
-                end
-                task.wait()
+                task.wait(0.03) -- Resposta mais rápida no P35
             end
             bv:Destroy()
             bg:Destroy()
-            FlyBtn.Text = "Ativar Voo Plano"
+            FlyVIPBtn.Text = "FLY VIP: OFF"
+            FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         end)
     end
 end)
