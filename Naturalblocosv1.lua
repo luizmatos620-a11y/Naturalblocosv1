@@ -1,57 +1,67 @@
--- LUIZ AURA VIP - FLY ESPECIAL KNOCKOUT
+-- LUIZ AURA VIP - RADAR DE SETAS (LEVE PARA P35)
 local ScreenGui = Instance.new("ScreenGui")
-local FrameVIP = Instance.new("Frame")
-local ButtonFly = Instance.new("TextButton")
+local RadarFrame = Instance.new("Frame")
+local ToggleRadar = Instance.new("TextButton")
 
 ScreenGui.Parent = game.CoreGui
-FrameVIP.Parent = ScreenGui
-FrameVIP.Size = UDim2.new(0, 180, 0, 80)
-FrameVIP.Position = UDim2.new(0.5, -90, 0.1, 0)
-FrameVIP.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-FrameVIP.Active = true
-FrameVIP.Draggable = true
+RadarFrame.Parent = ScreenGui
+RadarFrame.Size = UDim2.new(0, 150, 0, 40)
+RadarFrame.Position = UDim2.new(0.5, -75, 0.02, 0)
+RadarFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+RadarFrame.Active = true
+RadarFrame.Draggable = true
 
-ButtonFly.Parent = FrameVIP
-ButtonFly.Size = UDim2.new(0.9, 0, 0.7, 0)
-ButtonFly.Position = UDim2.new(0.05, 0, 0.15, 0)
-ButtonFly.Text = "FLY KNOCKOUT: OFF"
-ButtonFly.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
-ButtonFly.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleRadar.Parent = RadarFrame
+ToggleRadar.Size = UDim2.new(1, 0, 1, 0)
+ToggleRadar.Text = "RADAR: OFF"
+ToggleRadar.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleRadar.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
 
-local isFlying = false
-local flySpeed = 50
+local radarAtivo = false
+local setas = {}
 
-ButtonFly.MouseButton1Click:Connect(function()
-    isFlying = not isFlying
-    local char = game.Players.LocalPlayer.Character
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    local hum = char:WaitForChild("Humanoid")
+-- Função para criar a setinha
+local function criarSeta(player)
+    local seta = Instance.new("TextLabel")
+    seta.Parent = ScreenGui
+    seta.Text = "▲" -- Seta indicadora
+    seta.TextColor3 = Color3.fromRGB(0, 255, 0)
+    seta.BackgroundTransparency = 1
+    seta.Size = UDim2.new(0, 20, 0, 20)
+    seta.Visible = false
+    return seta
+end
 
-    if isFlying then
-        ButtonFly.Text = "FLY KNOCKOUT: ON"
-        ButtonFly.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+ToggleRadar.MouseButton1Click:Connect(function()
+    radarAtivo = not radarAtivo
+    ToggleRadar.Text = radarAtivo and "RADAR: ATIVO" or "RADAR: OFF"
+    ToggleRadar.BackgroundColor3 = radarAtivo and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
 
-        -- O segredo pro Knockout: MaxForce infinita impede empurrões
-        local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "AuraKnockout"
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- Força "infinita"
-        bv.Velocity = Vector3.new(0, 0, 0)
-
+    if radarAtivo then
         task.spawn(function()
-            while isFlying do
-                -- Voo controlado apenas pelo seu analógico
-                if hum.MoveDirection.Magnitude > 0 then
-                    bv.Velocity = hum.MoveDirection * flySpeed
-                else
-                    -- Fica travado no ar (Imunidade total a empurrões)
-                    bv.Velocity = Vector3.new(0, 0, 0)
+            while radarAtivo do
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        if not setas[p] then setas[p] = criarSeta(p) end
+                        
+                        local hrp = p.Character.HumanoidRootPart
+                        local pos, visivel = game.Workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
+                        
+                        if visivel then
+                            setas[p].Visible = true
+                            setas[p].Position = UDim2.new(0, pos.X, 0, pos.Y - 40)
+                            -- Faz a seta apontar para onde o player olha
+                            setas[p].Rotation = hrp.Orientation.Y
+                        else
+                            setas[p].Visible = false
+                        end
+                    end
                 end
-                task.wait(0.05) -- Estável para o processador P35
+                task.wait(0.05) -- Estabilidade para o P35
             end
-            if bv then bv:Destroy() end
+            -- Limpa as setas ao desligar
+            for _, s in pairs(setas) do s:Destroy() end
+            setas = {}
         end)
-    else
-        ButtonFly.Text = "FLY KNOCKOUT: OFF"
-        ButtonFly.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
     end
 end)
