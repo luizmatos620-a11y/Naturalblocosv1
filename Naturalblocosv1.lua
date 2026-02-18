@@ -1,67 +1,45 @@
--- LUIZ AURA VIP - RADAR DE SETAS (LEVE PARA P35)
+-- LUIZ AURA VIP - EYE TRACKER (DIREÇÃO DA CÂMERA)
 local ScreenGui = Instance.new("ScreenGui")
-local RadarFrame = Instance.new("Frame")
-local ToggleRadar = Instance.new("TextButton")
-
 ScreenGui.Parent = game.CoreGui
-RadarFrame.Parent = ScreenGui
-RadarFrame.Size = UDim2.new(0, 150, 0, 40)
-RadarFrame.Position = UDim2.new(0.5, -75, 0.02, 0)
-RadarFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-RadarFrame.Active = true
-RadarFrame.Draggable = true
 
-ToggleRadar.Parent = RadarFrame
-ToggleRadar.Size = UDim2.new(1, 0, 1, 0)
-ToggleRadar.Text = "RADAR: OFF"
-ToggleRadar.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleRadar.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+local alvos = {}
 
-local radarAtivo = false
-local setas = {}
-
--- Função para criar a setinha
-local function criarSeta(player)
+local function criarSetaCamera(player)
     local seta = Instance.new("TextLabel")
     seta.Parent = ScreenGui
-    seta.Text = "▲" -- Seta indicadora
-    seta.TextColor3 = Color3.fromRGB(0, 255, 0)
+    seta.Text = "V" -- Seta que aponta para baixo/frente
+    seta.TextColor3 = Color3.fromRGB(255, 255, 0) -- Amarelo VIP
+    seta.TextStrokeTransparency = 0
     seta.BackgroundTransparency = 1
-    seta.Size = UDim2.new(0, 20, 0, 20)
-    seta.Visible = false
+    seta.Size = UDim2.new(0, 30, 0, 30)
+    seta.Font = Enum.Font.SourceSansBold
+    seta.TextSize = 25
     return seta
 end
 
-ToggleRadar.MouseButton1Click:Connect(function()
-    radarAtivo = not radarAtivo
-    ToggleRadar.Text = radarAtivo and "RADAR: ATIVO" or "RADAR: OFF"
-    ToggleRadar.BackgroundColor3 = radarAtivo and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
-
-    if radarAtivo then
-        task.spawn(function()
-            while radarAtivo do
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        if not setas[p] then setas[p] = criarSeta(p) end
-                        
-                        local hrp = p.Character.HumanoidRootPart
-                        local pos, visivel = game.Workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
-                        
-                        if visivel then
-                            setas[p].Visible = true
-                            setas[p].Position = UDim2.new(0, pos.X, 0, pos.Y - 40)
-                            -- Faz a seta apontar para onde o player olha
-                            setas[p].Rotation = hrp.Orientation.Y
-                        else
-                            setas[p].Visible = false
-                        end
-                    end
+task.spawn(function()
+    while true do
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+                if not alvos[p] then alvos[p] = criarSetaCamera(p) end
+                
+                local cabeça = p.Character.Head
+                local pos, visivel = game.Workspace.CurrentCamera:WorldToViewportPoint(cabeça.Position)
+                
+                if visivel then
+                    alvos[p].Visible = true
+                    alvos[p].Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 70)
+                    
+                    -- A MÁGICA: A seta gira conforme a inclinação da CABEÇA (Olhar)
+                    -- Isso mostra para onde a câmera do player está apontada
+                    local direcao = cabeça.CFrame.LookVector
+                    local angulo = math.atan2(direcao.X, direcao.Z)
+                    alvos[p].Rotation = math.deg(angulo) + 180
+                else
+                    alvos[p].Visible = false
                 end
-                task.wait(0.05) -- Estabilidade para o P35
             end
-            -- Limpa as setas ao desligar
-            for _, s in pairs(setas) do s:Destroy() end
-            setas = {}
-        end)
+        end
+        task.wait(0.02) -- Resposta ultra rápida para não perder o olhar
     end
 end)
