@@ -1,57 +1,77 @@
--- Script Luiz Aura para Delta (Roblox)
+-- Script Luiz Aura para Delta (Roblox) - Fly & Anti-Push
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local RandomBtn = Instance.new("TextButton")
-local FreezeBtn = Instance.new("TextButton")
+local FlyBtn = Instance.new("TextButton")
+local AntiPushBtn = Instance.new("TextButton")
 
--- Configuração da Interface (Leve para o P35)
 ScreenGui.Parent = game.CoreGui
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Size = UDim2.new(0, 200, 0, 160)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Você pode arrastar o menu
+MainFrame.Draggable = true 
 
 Title.Parent = MainFrame
-Title.Text = "LUIZ AURA HUB"
+Title.Text = "LUIZ AURA - SUPER"
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.TextColor3 = Color3.fromRGB(0, 191, 255)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Title.TextColor3 = Color3.fromRGB(0, 255, 127) -- Verde Brilhante
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 
--- Botão 1: Random Player (Teleporte)
-RandomBtn.Parent = MainFrame
-RandomBtn.Text = "Random Player"
-RandomBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
-RandomBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+-- FUNÇÃO 1: VÔO DO SUPER HOMEM (FLY)
+local flying = false
+local speed = 50
+FlyBtn.Parent = MainFrame
+FlyBtn.Text = "Vôo do Super Homem"
+FlyBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+FlyBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
 
-RandomBtn.MouseButton1Click:Connect(function()
-    local players = game.Players:GetPlayers()
-    local randomPlayer = players[math.random(1, #players)]
-    if randomPlayer and randomPlayer.Character then
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = randomPlayer.Character.HumanoidRootPart.CFrame
-        print("Teleportado para: " .. randomPlayer.Name)
+FlyBtn.MouseButton1Click:Connect(function()
+    flying = not flying
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    
+    if flying then
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        local bv = Instance.new("BodyVelocity", hrp)
+        bv.Name = "AuraFly"
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        
+        -- Loop do Vôo
+        task.spawn(function()
+            while flying do
+                bv.Velocity = game.Workspace.CurrentCamera.CFrame.LookVector * speed
+                task.wait()
+            end
+            bv:Destroy()
+        end)
+    else
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
     end
 end)
 
--- Botão 2: Travar Boneco (Anti-Push/Freeze)
-FreezeBtn.Parent = MainFrame
-FreezeBtn.Text = "Travar/Destravar"
-FreezeBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
-FreezeBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+-- FUNÇÃO 2: ANTI-PUSH (PESO INFINITO)
+local antipush = false
+AntiPushBtn.Parent = MainFrame
+AntiPushBtn.Text = "Anti-Push (Travado)"
+AntiPushBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+AntiPushBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
 
-local travado = false
-FreezeBtn.MouseButton1Click:Connect(function()
-    travado = not travado
+AntiPushBtn.MouseButton1Click:Connect(function()
+    antipush = not antipush
     local char = game.Players.LocalPlayer.Character
     if char then
-        for _, part in pairs(char:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.Anchored = travado -- Trava a física do boneco
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then
+                -- Define a massa como gigante para ninguém te empurrar
+                v.CustomPhysicalProperties = antipush and PhysicalProperties.new(100, 0.3, 0.5) or nil
+                -- Alternativa visual: Ancorar se estiver parado
+                if antipush then v.Anchored = true else v.Anchored = false end
             end
         end
     end
-    FreezeBtn.Text = travado and "DESTRAVAR" or "TRAVAR BONECO"
+    AntiPushBtn.Text = antipush and "MODO PESADO ON" or "ANTI-PUSH OFF"
 end)
-
