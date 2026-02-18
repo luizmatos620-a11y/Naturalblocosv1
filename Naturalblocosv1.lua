@@ -1,70 +1,57 @@
--- LUIZ AURA MENU VIP V2 (Fly Estabilizado)
+-- LUIZ AURA VIP - FLY ESPECIAL KNOCKOUT
 local ScreenGui = Instance.new("ScreenGui")
-local VIPFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local FlyVIPBtn = Instance.new("TextButton")
+local FrameVIP = Instance.new("Frame")
+local ButtonFly = Instance.new("TextButton")
 
 ScreenGui.Parent = game.CoreGui
-VIPFrame.Parent = ScreenGui
-VIPFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Fundo VIP Preto
-VIPFrame.BorderSizePixel = 2
-VIPFrame.BorderColor3 = Color3.fromRGB(255, 215, 0) -- Borda Dourada
-VIPFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
-VIPFrame.Size = UDim2.new(0, 200, 0, 120)
-VIPFrame.Active = true
-VIPFrame.Draggable = true 
+FrameVIP.Parent = ScreenGui
+FrameVIP.Size = UDim2.new(0, 180, 0, 80)
+FrameVIP.Position = UDim2.new(0.5, -90, 0.1, 0)
+FrameVIP.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FrameVIP.Active = true
+FrameVIP.Draggable = true
 
-Title.Parent = VIPFrame
-Title.Text = "LUIZ AURA VIP"
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.TextColor3 = Color3.fromRGB(255, 215, 0)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ButtonFly.Parent = FrameVIP
+ButtonFly.Size = UDim2.new(0.9, 0, 0.7, 0)
+ButtonFly.Position = UDim2.new(0.05, 0, 0.15, 0)
+ButtonFly.Text = "FLY KNOCKOUT: OFF"
+ButtonFly.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+ButtonFly.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Lógica do FLY VIP (O que você pediu)
-local voador = false
-local velo = 70 -- Velocidade VIP
-FlyVIPBtn.Parent = VIPFrame
-FlyVIPBtn.Text = "FLY VIP: OFF"
-FlyVIPBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
-FlyVIPBtn.Size = UDim2.new(0.8, 0, 0.4, 0)
-FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-FlyVIPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+local isFlying = false
+local flySpeed = 50
 
-FlyVIPBtn.MouseButton1Click:Connect(function()
-    voador = not voador
+ButtonFly.MouseButton1Click:Connect(function()
+    isFlying = not isFlying
     local char = game.Players.LocalPlayer.Character
     local hrp = char:WaitForChild("HumanoidRootPart")
     local hum = char:WaitForChild("Humanoid")
-    
-    if voador then
-        FlyVIPBtn.Text = "FLY VIP: ATIVO"
-        FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(218, 165, 32) -- Cor Ouro
-        
+
+    if isFlying then
+        ButtonFly.Text = "FLY KNOCKOUT: ON"
+        ButtonFly.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+
+        -- O segredo pro Knockout: MaxForce infinita impede empurrões
         local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "AuraVIP_Fly"
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        
-        local bg = Instance.new("BodyGyro", hrp)
-        bg.Name = "AuraVIP_Gyro"
-        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        bg.P = 10000 -- Mais força para não balançar
-        
+        bv.Name = "AuraKnockout"
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- Força "infinita"
+        bv.Velocity = Vector3.new(0, 0, 0)
+
         task.spawn(function()
-            while voador do
-                -- Movimento Horizontal Puro (Anti-Bug de Solo)
+            while isFlying do
+                -- Voo controlado apenas pelo seu analógico
                 if hum.MoveDirection.Magnitude > 0 then
-                    local direcao = hum.MoveDirection
-                    bv.Velocity = Vector3.new(direcao.X * velo, 0, direcao.Z * velo)
-                    bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(direcao.X, 0, direcao.Z))
+                    bv.Velocity = hum.MoveDirection * flySpeed
                 else
+                    -- Fica travado no ar (Imunidade total a empurrões)
                     bv.Velocity = Vector3.new(0, 0, 0)
                 end
-                task.wait(0.03) -- Resposta mais rápida no P35
+                task.wait(0.05) -- Estável para o processador P35
             end
-            bv:Destroy()
-            bg:Destroy()
-            FlyVIPBtn.Text = "FLY VIP: OFF"
-            FlyVIPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            if bv then bv:Destroy() end
         end)
+    else
+        ButtonFly.Text = "FLY KNOCKOUT: OFF"
+        ButtonFly.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
     end
 end)
