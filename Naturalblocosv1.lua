@@ -1,45 +1,44 @@
--- LUIZ AURA VIP - EYE TRACKER (DIREÇÃO DA CÂMERA)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.CoreGui
+-- LUIZ AURA VIP - TRACKER SEGURO
+local p = game:GetService("Players")
+local lp = p.LocalPlayer
+local sg = Instance.new("ScreenGui", game:GetService("CoreGui"))
 
-local alvos = {}
-
-local function criarSetaCamera(player)
-    local seta = Instance.new("TextLabel")
-    seta.Parent = ScreenGui
-    seta.Text = "V" -- Seta que aponta para baixo/frente
-    seta.TextColor3 = Color3.fromRGB(255, 255, 0) -- Amarelo VIP
-    seta.TextStrokeTransparency = 0
-    seta.BackgroundTransparency = 1
-    seta.Size = UDim2.new(0, 30, 0, 30)
-    seta.Font = Enum.Font.SourceSansBold
-    seta.TextSize = 25
-    return seta
+local function criarSeta(player)
+    local s = Instance.new("TextLabel", sg)
+    s.Text = "V"
+    s.TextColor3 = Color3.fromRGB(255, 255, 0)
+    s.BackgroundTransparency = 1
+    s.Size = UDim2.new(0, 30, 0, 30)
+    s.Font = Enum.Font.SourceSansBold
+    s.TextSize = 25
+    return s
 end
 
-task.spawn(function()
-    while true do
-        for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                if not alvos[p] then alvos[p] = criarSetaCamera(p) end
+local setas = {}
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    for _, v in pairs(p:GetPlayers()) do
+        if v ~= lp and v.Character and v.Character:FindFirstChild("Head") then
+            if not setas[v] then setas[v] = criarSeta(v) end
+            
+            local cam = workspace.CurrentCamera
+            local head = v.Character.Head
+            local pos, vis = cam:WorldToViewportPoint(head.Position)
+            
+            if vis then
+                setas[v].Visible = true
+                setas[v].Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 70)
                 
-                local cabeça = p.Character.Head
-                local pos, visivel = game.Workspace.CurrentCamera:WorldToViewportPoint(cabeça.Position)
-                
-                if visivel then
-                    alvos[p].Visible = true
-                    alvos[p].Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 70)
-                    
-                    -- A MÁGICA: A seta gira conforme a inclinação da CABEÇA (Olhar)
-                    -- Isso mostra para onde a câmera do player está apontada
-                    local direcao = cabeça.CFrame.LookVector
-                    local angulo = math.atan2(direcao.X, direcao.Z)
-                    alvos[p].Rotation = math.deg(angulo) + 180
-                else
-                    alvos[p].Visible = false
-                end
+                -- Rastreia para onde a cabeça do pinguim está virada (Câmera dele)
+                local look = head.CFrame.LookVector
+                local angulo = math.atan2(look.X, look.Z)
+                setas[v].Rotation = math.deg(angulo) + 180
+            else
+                setas[v].Visible = false
             end
+        elseif setas[v] then
+            setas[v]:Destroy()
+            setas[v] = nil
         end
-        task.wait(0.02) -- Resposta ultra rápida para não perder o olhar
     end
 end)
