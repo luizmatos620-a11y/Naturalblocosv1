@@ -1,40 +1,54 @@
--- LUIZ AURA VIP V7 - AUTO-RECARGA (FIX PARTIDA)
+-- LUIZ AURA VIP V10 - ANTI-LOBBY ATTACK
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
--- Função para criar a caixa preta
-local function criarCaixa(p)
-    if p == LP then return end
+local autoHit = false
 
-    local function aplicar()
-        -- Espera o pinguim carregar na arena
-        local char = p.Character or p.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart", 10)
-        
-        if hrp then
-            -- Se já tiver um ESP antigo, deleta pra não bugar
-            if hrp:FindFirstChild("AuraPreta") then hrp.AuraPreta:Destroy() end
-            
-            local box = Instance.new("SelectionBox")
-            box.Name = "AuraPreta"
-            box.Adornee = char
-            box.Parent = hrp
-            box.Color3 = Color3.fromRGB(0, 0, 0)
-            box.LineThickness = 0.15 -- Mais grosso pra ver bem no Kwai
-            box.AlwaysOnTop = true
-            box.Transparency = 0
+-- Função para verificar se o pinguim está REALMENTE no gelo
+-- Geralmente o Lobby fica em uma altura diferente ou longe do centro (0,0,0)
+local function estaNoGelo(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local pos = player.Character.HumanoidRootPart.Position
+        -- No Be a Penguin, o gelo geralmente fica perto da altura 0 a 20.
+        -- Se o player estiver muito alto ou muito longe do centro, ele está no lobby.
+        if pos.Y < 30 and pos.Y > -10 and (pos.Magnitude < 250) then 
+            return true 
         end
     end
-
-    -- O SEGREDO: Rodar toda vez que o player "reaparecer" na arena
-    p.CharacterAdded:Connect(aplicar)
-    aplicar()
+    return false
 end
 
--- Ativa o monitoramento constante
-for _, v in pairs(Players:GetPlayers()) do
-    criarCaixa(v)
+local function getAlvoValido()
+    local maisPerto = nil
+    local menorDist = math.huge
+    
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and estaNoGelo(p) then
+            local d = (LP.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < menorDist then
+                menorDist = d
+                maisPerto = p
+            end
+        end
+    end
+    return maisPerto
 end
-Players.PlayerAdded:Connect(criarCaixa)
 
-print("Luiz Aura VIP: ESP Monitorando Arena...")
+-- LÓGICA DE ATAQUE (Executar no botão do seu Menu)
+task.spawn(function()
+    while true do
+        if autoHit then
+            local alvo = getAlvoValido()
+            if alvo and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                local meuHrp = LP.Character.HumanoidRootPart
+                local alvoHrp = alvo.Character.HumanoidRootPart
+                
+                -- IMPACTO VELOZ (Frente e Trás instantâneo)
+                meuHrp.CFrame = alvoHrp.CFrame * CFrame.new(0, 0, 1.2)
+                task.wait(0.05) -- Pequeno delay para o motor físico registrar o peso
+                meuHrp.CFrame = alvoHrp.CFrame * CFrame.new(0, 0, -1.2)
+            end
+        end
+        task.wait(0.1) -- Proteção para o seu Helio P35
+    end
+end)
