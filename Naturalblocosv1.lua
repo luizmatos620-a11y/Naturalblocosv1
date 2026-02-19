@@ -1,82 +1,81 @@
--- LUIZ AURA VIP V10 - FINAL
+-- LUIZ AURA VIP - AUTO WIN COM FILTRO
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
 
--- VARIÁVEIS DE CONTROLE
-local autoHitAtivo = false
+local autoWin = false
 
--- CRIAR INTERFACE (Design Luiz Aura)
+-- INTERFACE MÍNIMA (PARA NÃO TRAVAR O P35)
 local Main = Instance.new("Frame", SG)
-Main.Size = UDim2.new(0, 200, 0, 180)
-Main.Position = UDim2.new(0.5, -100, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Main.Size = UDim2.new(0, 160, 0, 100)
+Main.Position = UDim2.new(0.5, -80, 0.4, 0)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Main.Active = true
 Main.Draggable = true
-Instance.new("UICorner", Main)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "LUIZ AURA VIP V10"
-Title.TextColor3 = Color3.fromRGB(0, 255, 150)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "LUIZ AURA VIP"
+Title.TextColor3 = Color3.fromRGB(0, 255, 127)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
+Title.TextSize = 14
 
--- BOTÃO AUTO HIT (FILTRADO)
-local HitBtn = Instance.new("TextButton", Main)
-HitBtn.Size = UDim2.new(0.8, 0, 0, 40)
-HitBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
-HitBtn.Text = "AUTO HIT: OFF"
-HitBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-HitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", HitBtn)
+local WinBtn = Instance.new("TextButton", Main)
+WinBtn.Size = UDim2.new(0.85, 0, 0, 45)
+WinBtn.Position = UDim2.new(0.075, 0, 0.4, 0)
+WinBtn.Text = "AUTO WIN: OFF"
+WinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+WinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+WinBtn.Font = Enum.Font.GothamSemibold
+Instance.new("UICorner", WinBtn).CornerRadius = UDim.new(0, 8)
 
--- LÓGICA DO FILTRO DE ARENA (SÓ PEGA QUEM TÁ NO GELO)
-local function estaNoGelo(p)
+-- FILTRO DE ARENA (Ignora o Lobby)
+local function estaNaPartida(p)
     if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-        local y = p.Character.HumanoidRootPart.Position.Y
-        -- Filtra por altura: Se estiver muito alto ou baixo, é Lobby
-        if y > -10 and y < 25 then 
+        local pos = p.Character.HumanoidRootPart.Position
+        -- Altura padrão da arena do pinguim (Evita os jogadores que estão no alto do lobby)
+        if pos.Y > -15 and pos.Y < 22 then 
             return true 
         end
     end
     return false
 end
 
-HitBtn.MouseButton1Click:Connect(function()
-    autoHitAtivo = not autoHitAtivo
-    HitBtn.Text = autoHitAtivo and "HIT: ATIVO" or "HIT: OFF"
-    HitBtn.BackgroundColor3 = autoHitAtivo and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(40, 40, 40)
+WinBtn.MouseButton1Click:Connect(function()
+    autoWin = not autoWin
+    WinBtn.Text = autoWin and "WIN: ATIVO" or "AUTO WIN: OFF"
+    WinBtn.BackgroundColor3 = autoWin and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(40, 40, 40)
 end)
 
--- LOOP PRINCIPAL (OTIMIZADO PARA P35)
+-- LÓGICA DE ATAQUE POR IMPACTO
 task.spawn(function()
     while true do
-        if autoHitAtivo then
-            local alvoPerto = nil
-            local menorDist = math.huge
+        if autoWin and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+            local alvo = nil
+            local dist = math.huge
             
             for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LP and estaNoGelo(p) then
+                if p ~= LP and estaNaPartida(p) then
                     local d = (LP.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                    if d < menorDist then
-                        menorDist = d
-                        alvoPerto = p
+                    if d < dist then
+                        dist = d
+                        alvo = p
                     end
                 end
             end
             
-            if alvoPerto then
+            if alvo then
                 local hrp = LP.Character.HumanoidRootPart
-                local alvoHrp = alvoPerto.Character.HumanoidRootPart
-                -- Impacto rápido (atravessa e volta)
-                hrp.CFrame = alvoHrp.CFrame * CFrame.new(0, 0, 1.3)
-                task.wait(0.05)
-                hrp.CFrame = alvoHrp.CFrame * CFrame.new(0, 0, -1.3)
+                local targetHrp = alvo.Character.HumanoidRootPart
+                -- Impacto violento (Atropelar)
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1.1)
+                task.wait(0.03)
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -1.1)
             end
         end
-        task.wait(0.15) -- Delay de segurança para o Delta não fechar
+        task.wait(0.12) -- Seguro para o Delta no Helio P35
     end
 end)
-
-print("LUIZ AURA VIP CARREGADO COM SUCESSO")
