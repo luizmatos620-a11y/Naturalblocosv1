@@ -1,43 +1,58 @@
--- LUIZ AURA VIP - TRACKER REAL (OLHAR DELES)
+-- LUIZ AURA VIP - ESP TRACER & GHOST MODE
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
 
-local function criarSeta(p)
-    local s = Instance.new("TextLabel", SG)
-    s.Text = "▼" -- Seta apontando para onde o pinguim olha
-    s.TextColor3 = Color3.fromRGB(255, 255, 0)
-    s.BackgroundTransparency = 1
-    s.Size = UDim2.new(0, 30, 0, 30)
-    s.Font = Enum.Font.SourceSansBold
-    s.TextSize = 30
-    return s
+-- FUNÇÃO 1: GHOST MODE (Atravessar Players)
+-- No P35, isso evita que você seja jogado longe no Knockout
+RunService.Stepped:Connect(function()
+    if LP.Character then
+        for _, part in pairs(LP.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false -- Você atravessa tudo
+            end
+        end
+    end
+end)
+
+-- FUNÇÃO 2: ESP TRACER (Linha de Direção)
+local function criarLinha()
+    local line = Instance.new("Frame", SG)
+    line.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Vermelho Alvo
+    line.BorderSizePixel = 0
+    line.AnchorPoint = Vector2.new(0.5, 0.5)
+    return line
 end
 
-local setas = {}
+local tracers = {}
 
-game:GetService("RunService").RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
     for _, v in pairs(Players:GetPlayers()) do
         if v ~= LP and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            if not setas[v] then setas[v] = criarSeta(v) end
+            if not tracers[v] then tracers[v] = criarLinha() end
             
-            local cam = workspace.CurrentCamera
             local hrp = v.Character.HumanoidRootPart
-            local pos, vis = cam:WorldToViewportPoint(hrp.Position)
+            local cam = workspace.CurrentCamera
             
-            if vis then
-                setas[v].Visible = true
-                setas[v].Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 80)
+            -- Ponto inicial (Pinguim) e Ponto final (Para onde ele olha)
+            local startPos, vis1 = cam:WorldToViewportPoint(hrp.Position)
+            local endPos, vis2 = cam:WorldToViewportPoint(hrp.Position + (hrp.CFrame.LookVector * 10))
+            
+            if vis1 and vis2 then
+                local line = tracers[v]
+                local dist = (Vector2.new(startPos.X, startPos.Y) - Vector2.new(endPos.X, endPos.Y)).Magnitude
                 
-                -- O SEGREDO: Pega a rotação do corpo do PLAYER, não da TUA câmera
-                -- Isso faz a seta girar conforme o pinguim vira o olhar
-                setas[v].Rotation = hrp.Orientation.Y + 180
+                line.Visible = true
+                line.Size = UDim2.new(0, dist, 0, 2)
+                line.Position = UDim2.new(0, (startPos.X + endPos.X) / 2, 0, (startPos.Y + endPos.Y) / 2)
+                line.Rotation = math.deg(math.atan2(endPos.Y - startPos.Y, endPos.X - startPos.X))
             else
-                setas[v].Visible = false
+                tracers[v].Visible = false
             end
-        elseif setas[v] then
-            setas[v]:Destroy()
-            setas[v] = nil
+        elseif tracers[v] then
+            tracers[v]:Destroy()
+            tracers[v] = nil
         end
     end
 end)
