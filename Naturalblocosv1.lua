@@ -1,85 +1,57 @@
--- LUIZ AURA VIP V4 - TELEPORT & ESP GIGANTE
+-- LUIZ AURA VIP V5 - ANTI-INVISIBILIDADE & ESP POTENTE
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
 
--- Design do Menu Moderno
-local Main = Instance.new("Frame", SG)
-Main.Size = UDim2.new(0, 220, 0, 200)
-Main.Position = UDim2.new(0.5, -110, 0.2, 0)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Main.Active = true
-Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "LUIZ AURA VIP V4"
-Title.TextColor3 = Color3.fromRGB(0, 255, 255)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-
--- 1. FUNÇÃO RANDOM PLAYER (LISTA REAL)
-local TPBtn = Instance.new("TextButton", Main)
-TPBtn.Size = UDim2.new(0.8, 0, 0, 40)
-TPBtn.Position = UDim2.new(0.1, 0, 0.25, 0)
-TPBtn.Text = "TELEPORT RANDOM"
-TPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", TPBtn).CornerRadius = UDim.new(0, 8)
-
-TPBtn.MouseButton1Click:Connect(function()
-    local listaPlayers = Players:GetPlayers()
-    -- Tira você da lista para não teleportar em si mesmo
-    for i, p in ipairs(listaPlayers) do
-        if p == LP then table.remove(listaPlayers, i) break end
-    end
+local function criarESP(p)
+    if p == LP then return end
     
-    if #listaPlayers > 0 then
-        local alvo = listaPlayers[math.random(1, #listaPlayers)]
-        if alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart") then
-            LP.Character.HumanoidRootPart.CFrame = alvo.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
-            print("Luiz Aura VIP: Indo até " .. alvo.Name)
-        end
-    end
-end)
-
--- 2. FUNÇÃO ESP NAME GIGANTE
-local ESPBtn = Instance.new("TextButton", Main)
-ESPBtn.Size = UDim2.new(0.8, 0, 0, 40)
-ESPBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
-ESPBtn.Text = "ESP NAME: OFF"
-ESPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ESPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", ESPBtn).CornerRadius = UDim.new(0, 8)
-
-local espAtivo = false
-ESPBtn.MouseButton1Click:Connect(function()
-    espAtivo = not espAtivo
-    ESPBtn.Text = espAtivo and "ESP NAME: ATIVO" or "ESP NAME: OFF"
-    
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character then
-            local head = p.Character:FindFirstChild("Head")
-            if head then
-                if espAtivo then
-                    local bb = Instance.new("BillboardGui", head)
-                    bb.Name = "AuraESP"
-                    bb.Size = UDim2.new(0, 200, 0, 50)
-                    bb.AlwaysOnTop = true
-                    bb.ExtentsOffset = Vector3.new(0, 3, 0)
-                    
-                    local tl = Instance.new("TextLabel", bb)
-                    tl.Size = UDim2.new(1, 0, 1, 0)
-                    tl.Text = p.Name
-                    tl.TextColor3 = Color3.fromRGB(255, 255, 0)
-                    tl.TextScaled = true -- Fica gigante conforme a distância
-                    tl.BackgroundTransparency = 1
-                    tl.Font = Enum.Font.GothamBold
-                else
-                    if head:FindFirstChild("AuraESP") then head.AuraESP:Destroy() end
+    -- Função que roda sempre que o personagem nasce ou muda
+    p.CharacterAdded:Connect(function(char)
+        local hrp = char:WaitForChild("HumanoidRootPart", 10)
+        if hrp then
+            -- Remove ESP antigo se existir
+            if hrp:FindFirstChild("AuraUltraESP") then hrp.AuraUltraESP:Destroy() end
+            
+            -- Cria o BillboardGui (Fica visível através de paredes e invisibilidade)
+            local bb = Instance.new("BillboardGui", hrp)
+            bb.Name = "AuraUltraESP"
+            bb.Size = UDim2.new(0, 100, 0, 50)
+            bb.AlwaysOnTop = true -- O SEGREDO: Ignora qualquer bloqueio visual
+            bb.ExtentsOffset = Vector3.new(0, 3, 0)
+            
+            -- Nome do Jogador (Grande e Amarelo)
+            local nameLabel = Instance.new("TextLabel", bb)
+            nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            nameLabel.Text = "[ " .. p.Name .. " ]"
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+            nameLabel.TextStrokeTransparency = 0
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.TextScaled = true
+            nameLabel.Font = Enum.Font.GothamBold
+            
+            -- Indicador de Distância
+            local distLabel = Instance.new("TextLabel", bb)
+            distLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            distLabel.Position = UDim2.new(0, 0, 0.5, 0)
+            distLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+            distLabel.BackgroundTransparency = 1
+            distLabel.TextScaled = true
+            
+            -- Loop para atualizar distância (Leve para o P35)
+            task.spawn(function()
+                while bb.Parent do
+                    local distancia = (hrp.Position - LP.Character.HumanoidRootPart.Position).Magnitude
+                    distLabel.Text = math.floor(distancia) .. "m"
+                    task.wait(0.5)
                 end
-            end
+            end)
         end
-    end
-end)
+    end)
+end
+
+-- Ativa para quem já está no servidor e novos que entrarem
+for _, player in pairs(Players:GetPlayers()) do
+    criarESP(player)
+end
+Players.PlayerAdded:Connect(criarESP)
