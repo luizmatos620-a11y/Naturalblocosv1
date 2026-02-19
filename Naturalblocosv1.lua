@@ -1,58 +1,81 @@
--- LUIZ AURA VIP - ESP TRACER & GHOST MODE
+-- LUIZ AURA MENU VIP V3 - DESIGN MODERNO
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
-local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
 
--- FUNÇÃO 1: GHOST MODE (Atravessar Players)
--- No P35, isso evita que você seja jogado longe no Knockout
-RunService.Stepped:Connect(function()
-    if LP.Character then
-        for _, part in pairs(LP.Character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false -- Você atravessa tudo
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local MainFrame = Instance.new("Frame", ScreenGui)
+local UICorner = Instance.new("UICorner", MainFrame)
+local Title = Instance.new("TextLabel", MainFrame)
+local FlingBtn = Instance.new("TextButton", MainFrame)
+local GhostBtn = Instance.new("TextButton", MainFrame)
+
+-- DESIGN MODERNO (Neon Aura)
+MainFrame.Size = UDim2.new(0, 220, 0, 180)
+MainFrame.Position = UDim2.new(0.5, -110, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+UICorner.CornerRadius = UDim.new(0, 15)
+
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "LUIZ AURA VIP"
+Title.TextColor3 = Color3.fromRGB(0, 255, 127) -- Verde Neon
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+
+-- FUNÇÃO FLING (Girar para Jogar Longe)
+local flingAtivo = false
+FlingBtn.Size = UDim2.new(0.8, 0, 0, 40)
+FlingBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+FlingBtn.Text = "FLING: OFF"
+FlingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", FlingBtn).CornerRadius = UDim.new(0, 8)
+
+FlingBtn.MouseButton1Click:Connect(function()
+    flingAtivo = not flingAtivo
+    FlingBtn.Text = flingAtivo and "FLING: ATIVO" or "FLING: OFF"
+    FlingBtn.BackgroundColor3 = flingAtivo and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 45, 45)
+    
+    task.spawn(function()
+        local bodyAng = Instance.new("BodyAngularVelocity")
+        bodyAng.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        bodyAng.P = 10000
+        
+        while flingAtivo do
+            if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                bodyAng.Parent = LP.Character.HumanoidRootPart
+                bodyAng.AngularVelocity = Vector3.new(0, 99999, 0) -- Giro Ultra Rápido
             end
+            task.wait(0.1)
         end
-    end
+        bodyAng:Destroy()
+    end)
 end)
 
--- FUNÇÃO 2: ESP TRACER (Linha de Direção)
-local function criarLinha()
-    local line = Instance.new("Frame", SG)
-    line.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Vermelho Alvo
-    line.BorderSizePixel = 0
-    line.AnchorPoint = Vector2.new(0.5, 0.5)
-    return line
-end
+-- FUNÇÃO GHOST (Atravessar + Complemento Fling)
+local ghostAtivo = false
+GhostBtn.Size = UDim2.new(0.8, 0, 0, 40)
+GhostBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+GhostBtn.Text = "GHOST: OFF"
+GhostBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+GhostBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", GhostBtn).CornerRadius = UDim.new(0, 8)
 
-local tracers = {}
+GhostBtn.MouseButton1Click:Connect(function()
+    ghostAtivo = not ghostAtivo
+    GhostBtn.Text = ghostAtivo and "GHOST: ATIVO" or "GHOST: OFF"
+    GhostBtn.BackgroundColor3 = ghostAtivo and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(45, 45, 45)
+end)
 
-RunService.RenderStepped:Connect(function()
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LP and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            if not tracers[v] then tracers[v] = criarLinha() end
-            
-            local hrp = v.Character.HumanoidRootPart
-            local cam = workspace.CurrentCamera
-            
-            -- Ponto inicial (Pinguim) e Ponto final (Para onde ele olha)
-            local startPos, vis1 = cam:WorldToViewportPoint(hrp.Position)
-            local endPos, vis2 = cam:WorldToViewportPoint(hrp.Position + (hrp.CFrame.LookVector * 10))
-            
-            if vis1 and vis2 then
-                local line = tracers[v]
-                local dist = (Vector2.new(startPos.X, startPos.Y) - Vector2.new(endPos.X, endPos.Y)).Magnitude
-                
-                line.Visible = true
-                line.Size = UDim2.new(0, dist, 0, 2)
-                line.Position = UDim2.new(0, (startPos.X + endPos.X) / 2, 0, (startPos.Y + endPos.Y) / 2)
-                line.Rotation = math.deg(math.atan2(endPos.Y - startPos.Y, endPos.X - startPos.X))
-            else
-                tracers[v].Visible = false
-            end
-        elseif tracers[v] then
-            tracers[v]:Destroy()
-            tracers[v] = nil
+RunService.Stepped:Connect(function()
+    if ghostAtivo and LP.Character then
+        for _, part in pairs(LP.Character:GetChildren()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
